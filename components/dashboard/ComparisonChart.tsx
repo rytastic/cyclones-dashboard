@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+import ReactECharts from 'echarts-for-react';
 import type { Season, ChartMetric } from './types';
 import { METRIC_LABELS, METRIC_SHORT } from './types';
 
@@ -32,6 +23,56 @@ export default function ComparisonChart({ season, metric, accentColor, highlight
       value: +p[metric].toFixed(1),
     }));
 
+  const option = {
+    backgroundColor: 'transparent',
+    grid: { top: 8, right: 16, bottom: 56, left: 40, containLabel: false },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#1e293b',
+      borderColor: '#334155',
+      borderWidth: 1,
+      textStyle: { color: '#e2e8f0', fontSize: 12 },
+      axisPointer: { type: 'none' },
+      formatter: (params: { name: string; value: number }[]) => {
+        const p = params[0];
+        const full = data.find(d => d.name === p.name)?.fullName ?? p.name;
+        return `${full}<br/><b>${p.value} ${METRIC_SHORT[metric]}</b>`;
+      },
+    },
+    xAxis: {
+      type: 'category',
+      data: data.map(d => d.name),
+      axisLine: { lineStyle: { color: '#e2e8f0' } },
+      axisTick: { show: false },
+      axisLabel: { color: '#94a3b8', fontSize: 10, rotate: -35, interval: 0 },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: '#f1f5f9' } },
+      axisLabel: { color: '#94a3b8', fontSize: 11 },
+    },
+    series: [
+      {
+        type: 'bar',
+        data: data.map(d => {
+          const isHl = highlightedPlayer !== null &&
+            d.fullName.toLowerCase().includes(highlightedPlayer.toLowerCase());
+          return {
+            value: d.value,
+            itemStyle: {
+              color: isHl ? primaryColor : dimColor,
+              opacity: highlightedPlayer && !isHl ? 0.5 : 1,
+              borderRadius: [4, 4, 0, 0],
+            },
+          };
+        }),
+        barMaxWidth: 40,
+      },
+    ],
+  };
+
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5">
       <div className="flex items-center justify-between mb-5">
@@ -46,54 +87,7 @@ export default function ComparisonChart({ season, metric, accentColor, highlight
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={data} margin={{ top: 5, right: 16, left: -10, bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-          <XAxis
-            dataKey="name"
-            tick={{ fill: '#94a3b8', fontSize: 10 }}
-            axisLine={{ stroke: '#e2e8f0' }}
-            tickLine={false}
-            angle={-35}
-            textAnchor="end"
-            interval={0}
-          />
-          <YAxis
-            tick={{ fill: '#94a3b8', fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-            width={32}
-          />
-          <Tooltip
-            cursor={{ fill: '#f8fafc' }}
-            contentStyle={{
-              background: '#1e293b',
-              border: '1px solid #334155',
-              borderRadius: '10px',
-              color: '#e2e8f0',
-              fontSize: 12,
-            }}
-            formatter={(value, _name, props) => [
-              `${value ?? 0} ${METRIC_SHORT[metric]}`,
-              (props as { payload?: { fullName?: string } }).payload?.fullName ?? '',
-            ]}
-            labelFormatter={() => ''}
-          />
-          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-            {data.map((entry) => {
-              const isHl = highlightedPlayer !== null &&
-                entry.fullName.toLowerCase().includes(highlightedPlayer.toLowerCase());
-              return (
-                <Cell
-                  key={entry.fullName}
-                  fill={isHl ? primaryColor : dimColor}
-                  opacity={highlightedPlayer && !isHl ? 0.5 : 1}
-                />
-              );
-            })}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <ReactECharts option={option} style={{ height: 260 }} notMerge />
     </div>
   );
 }
