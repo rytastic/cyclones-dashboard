@@ -18,23 +18,32 @@ export default function AuthoringFlow() {
   }
 
   return (
-    <div className="min-h-full bg-slate-900 flex flex-col">
-      {/* Top bar */}
-      <header className="flex items-center justify-between px-8 py-4 border-b border-slate-800">
+    <div className="min-h-full bg-background flex flex-col">
+      {/* M3 Top App Bar */}
+      <header
+        className="flex items-center justify-between px-6 py-3 bg-[var(--md-surface-container-low)] border-b border-[var(--md-outline-variant)]"
+        style={{ boxShadow: 'var(--md-elevation-1)' }}
+      >
+        {/* Leading — app logo + title */}
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-md bg-cardinal flex items-center justify-center">
-            <span className="text-white text-xs font-bold">IS</span>
+          <div
+            className="w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground font-bold text-xs"
+            style={{ borderRadius: 'var(--md-shape-small)' }}
+          >
+            IS
           </div>
-          <span className="text-slate-200 font-semibold text-sm tracking-wide">Dashboard Builder</span>
+          <span className="text-foreground font-medium text-base tracking-[0.15px]">
+            Dashboard Builder
+          </span>
         </div>
+
+        {/* Trailing — M3 horizontal stepper */}
         <StepPips current={step} />
       </header>
 
       <main className="flex-1 flex items-center justify-center p-8">
         {step === 'welcome' && (
-          <StepWelcome
-            onSubmit={(p) => { setPrompt(p); setStep('confirmation'); }}
-          />
+          <StepWelcome onSubmit={(p) => { setPrompt(p); setStep('confirmation'); }} />
         )}
         {step === 'confirmation' && (
           <StepConfirmation
@@ -56,40 +65,63 @@ export default function AuthoringFlow() {
 
 const STEPS: Step[] = ['welcome', 'confirmation', 'building', 'preview'];
 const STEP_LABELS: Record<Step, string> = {
-  welcome: 'Describe',
+  welcome:      'Describe',
   confirmation: 'Confirm',
-  building: 'Build',
-  preview: 'Preview',
-  published: 'Published',
+  building:     'Build',
+  preview:      'Preview',
+  published:    'Published',
 };
 
 function StepPips({ current }: { current: Step }) {
   const idx = STEPS.indexOf(current);
   return (
-    <div className="flex items-center gap-1.5">
-      {STEPS.map((s, i) => (
-        <div key={s} className="flex items-center gap-1.5">
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
-              i < idx
-                ? 'bg-cardinal/20 text-cardinal'
-                : i === idx
-                ? 'bg-cardinal text-white'
-                : 'bg-slate-800 text-slate-500'
-            }`}
-          >
-            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-              i < idx ? 'bg-cardinal text-white' : i === idx ? 'bg-white/20' : 'bg-slate-700'
-            }`}>
-              {i < idx ? '✓' : i + 1}
-            </span>
-            {STEP_LABELS[s]}
+    <div className="flex items-center">
+      {STEPS.map((s, i) => {
+        const isComplete = i < idx;
+        const isActive   = i === idx;
+
+        return (
+          <div key={s} className="flex items-center">
+            <div className="flex flex-col items-center gap-1">
+              {/* Step circle */}
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
+                  isComplete
+                    ? 'bg-primary text-primary-foreground'
+                    : isActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border-2 border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]'
+                }`}
+              >
+                {isComplete ? (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  i + 1
+                )}
+              </div>
+              {/* Step label */}
+              <span
+                className={`text-[10px] font-medium tracking-[0.5px] uppercase transition-colors duration-300 ${
+                  isActive ? 'text-primary' : 'text-[var(--md-on-surface-variant)]'
+                }`}
+              >
+                {STEP_LABELS[s]}
+              </span>
+            </div>
+
+            {/* Connector line */}
+            {i < STEPS.length - 1 && (
+              <div
+                className={`w-10 h-px mx-2 mb-4 transition-colors duration-300 ${
+                  isComplete ? 'bg-primary' : 'bg-[var(--md-outline-variant)]'
+                }`}
+              />
+            )}
           </div>
-          {i < STEPS.length - 1 && (
-            <div className={`w-6 h-px ${i < idx ? 'bg-cardinal/50' : 'bg-slate-700'}`} />
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

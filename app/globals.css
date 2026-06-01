@@ -5,20 +5,20 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ─── Design tokens ────────────────────────────────────────────────────────── */
-/* Meta-inspired palette — white surfaces, warm grey backgrounds, blue CTAs    */
+/* Material Design 3 — Iowa State Cyclones palette                             */
+/* Primary: Cardinal red  |  Secondary: Gold  |  Light surfaces                */
 
 @theme inline {
-  /* Fonts — literal names (not var references; @theme resolves at parse time) */
   --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "JetBrains Mono Fallback", ui-monospace, monospace;
 
-  /* Radius — subtle, Meta-style (8px base) */
-  --radius-sm:  calc(var(--radius) * 0.5);   /* 4px  */
-  --radius-md:  calc(var(--radius) * 0.75);  /* 6px  */
-  --radius-lg:  var(--radius);               /* 8px  */
-  --radius-xl:  calc(var(--radius) * 1.5);   /* 12px */
-  --radius-2xl: calc(var(--radius) * 2);     /* 16px */
-  --radius-3xl: calc(var(--radius) * 3);     /* 24px */
+  /* M3 shape scale mapped to radius aliases */
+  --radius-sm:  4px;   /* M3 extra-small */
+  --radius-md:  8px;   /* M3 small       */
+  --radius-lg:  12px;  /* M3 medium      */
+  --radius-xl:  16px;  /* M3 large       */
+  --radius-2xl: 28px;  /* M3 extra-large */
+  --radius-3xl: 9999px;/* M3 full        */
 
   /* shadcn semantic tokens → CSS vars below */
   --color-background:         var(--background);
@@ -54,91 +54,144 @@
   --color-sidebar-ring:               var(--sidebar-ring);
 }
 
-/* ─── Light mode ────────────────────────────────────────────────────────────── */
+/* ─── Light mode — M3 Iowa State ────────────────────────────────────────────── */
 :root {
-  --radius: 0.5rem;
+  --radius: 0.75rem; /* 12px = M3 medium shape (base for aliases above) */
 
   /* Surfaces */
-  --background:         oklch(0.955 0.005 260);   /* #F0F2F5 — Meta page bg  */
-  --foreground:         oklch(0.155 0.006 260);   /* #1C1E21 — near-black    */
-  --card:               oklch(1 0 0);             /* #FFFFFF — card surface  */
-  --card-foreground:    oklch(0.155 0.006 260);
-  --popover:            oklch(1 0 0);
-  --popover-foreground: oklch(0.155 0.006 260);
+  --background:         oklch(0.99 0.004 20);   /* #FFFBFF warm white  */
+  --foreground:         oklch(0.17 0.015 20);   /* #201A1A near-black   */
+  --card:               oklch(0.97 0.006 20);   /* surface container    */
+  --card-foreground:    oklch(0.17 0.015 20);
+  --popover:            oklch(0.99 0.004 20);
+  --popover-foreground: oklch(0.17 0.015 20);
 
-  /* Primary — Meta blue */
-  --primary:            oklch(0.546 0.231 264);   /* #0866FF */
-  --primary-foreground: oklch(1 0 0);             /* #FFFFFF */
+  /* Primary — Iowa State Cardinal #C8102E */
+  --primary:            oklch(0.47 0.22 20);
+  --primary-foreground: oklch(1 0 0);
 
-  /* Secondary — light surface */
-  --secondary:          oklch(0.945 0.004 260);   /* #E7E9ED */
-  --secondary-foreground: oklch(0.155 0.006 260);
+  /* Secondary — Gold tonal surface */
+  --secondary:          oklch(0.94 0.06 85);
+  --secondary-foreground: oklch(0.25 0.08 70);
 
-  /* Muted */
-  --muted:              oklch(0.955 0.005 260);   /* #F0F2F5 */
-  --muted-foreground:   oklch(0.47 0.006 260);    /* #65676B */
+  /* Muted — M3 surface variant */
+  --muted:              oklch(0.94 0.012 20);
+  --muted-foreground:   oklch(0.43 0.025 20);
 
-  /* Accent — light blue tint (hover states) */
-  --accent:             oklch(0.965 0.035 264);   /* #E7F3FF */
-  --accent-foreground:  oklch(0.546 0.231 264);   /* #0866FF */
+  /* Accent — M3 primary container (light cardinal tint) */
+  --accent:             oklch(0.94 0.04 20);
+  --accent-foreground:  oklch(0.22 0.12 20);
 
   /* Utility */
   --destructive:        oklch(0.577 0.245 27.325);
-  --border:             oklch(0.912 0.006 260);   /* #E4E6EB */
-  --input:              oklch(0.912 0.006 260);
-  --ring:               oklch(0.546 0.231 264);   /* #0866FF */
+  --border:             oklch(0.86 0.015 20);   /* outline-variant      */
+  --input:              oklch(0.55 0.025 20);   /* outline              */
+  --ring:               oklch(0.47 0.22 20);    /* cardinal focus ring  */
 
-  /* Charts — Meta product palette */
-  --chart-1: oklch(0.546 0.231 264);   /* Meta blue   */
-  --chart-2: oklch(0.56  0.163 152);   /* green       */
-  --chart-3: oklch(0.62  0.21   47);   /* amber       */
-  --chart-4: oklch(0.53  0.22   14);   /* red         */
-  --chart-5: oklch(0.51  0.19  294);   /* purple      */
+  /* Charts — Cyclones palette */
+  --chart-1: oklch(0.47 0.22 20);   /* Cardinal red  */
+  --chart-2: oklch(0.76 0.15 80);   /* Iowa State Gold */
+  --chart-3: oklch(0.56 0.163 152); /* green         */
+  --chart-4: oklch(0.51 0.19 294);  /* purple        */
+  --chart-5: oklch(0.62 0.21 47);   /* amber         */
 
-  /* Sidebar — dark, Meta-style left nav */
-  --sidebar:                    oklch(0.155 0.006 260);  /* #1C1E21 */
-  --sidebar-foreground:         oklch(0.912 0.006 260);  /* #E4E6EB */
-  --sidebar-primary:            oklch(0.546 0.231 264);  /* #0866FF */
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent:             oklch(0.22  0.006 260);  /* hover    */
+  /* Sidebar — dark with cardinal tint */
+  --sidebar:                    oklch(0.18 0.035 20);
+  --sidebar-foreground:         oklch(0.92 0.006 20);
+  --sidebar-primary:            oklch(0.76 0.15 80);   /* gold accent */
+  --sidebar-primary-foreground: oklch(0.22 0.08 65);
+  --sidebar-accent:             oklch(0.25 0.025 20);
   --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border:             oklch(0.27  0.006 260);  /* dividers */
-  --sidebar-ring:               oklch(0.546 0.231 264);
+  --sidebar-border:             oklch(0.30 0.025 20);
+  --sidebar-ring:               oklch(0.76 0.15 80);
+
+  /* ── M3 extended color roles ──────────────────────────────────────────── */
+  --md-primary:                oklch(0.47 0.22 20);
+  --md-on-primary:             oklch(1 0 0);
+  --md-primary-container:      oklch(0.94 0.04 20);
+  --md-on-primary-container:   oklch(0.20 0.12 20);
+
+  --md-secondary:              oklch(0.48 0.10 80);
+  --md-on-secondary:           oklch(1 0 0);
+  --md-secondary-container:    oklch(0.94 0.06 85);
+  --md-on-secondary-container: oklch(0.25 0.08 70);
+
+  --md-tertiary:               oklch(0.40 0.15 260);  /* blue accent */
+  --md-on-tertiary:            oklch(1 0 0);
+  --md-tertiary-container:     oklch(0.92 0.04 260);
+  --md-on-tertiary-container:  oklch(0.15 0.10 260);
+
+  --md-error:                  oklch(0.50 0.22 25);
+  --md-on-error:               oklch(1 0 0);
+  --md-error-container:        oklch(0.93 0.05 25);
+  --md-on-error-container:     oklch(0.22 0.14 25);
+
+  --md-surface:                oklch(0.99 0.004 20);
+  --md-on-surface:             oklch(0.17 0.015 20);
+  --md-surface-variant:        oklch(0.94 0.012 20);
+  --md-on-surface-variant:     oklch(0.43 0.025 20);
+  --md-surface-container-low:  oklch(0.97 0.006 20);
+  --md-surface-container:      oklch(0.95 0.008 20);
+  --md-surface-container-high: oklch(0.92 0.010 20);
+
+  --md-outline:                oklch(0.55 0.025 20);
+  --md-outline-variant:        oklch(0.86 0.015 20);
+
+  --md-inverse-surface:        oklch(0.28 0.018 20);
+  --md-inverse-on-surface:     oklch(0.92 0.005 20);
+  --md-inverse-primary:        oklch(0.82 0.12 20);
+
+  /* ── M3 shape tokens ───────────────────────────────────────────────────── */
+  --md-shape-none:         0px;
+  --md-shape-extra-small:  4px;
+  --md-shape-small:        8px;
+  --md-shape-medium:       12px;
+  --md-shape-large:        16px;
+  --md-shape-extra-large:  28px;
+  --md-shape-full:         9999px;
+
+  /* ── M3 elevation (tonal + shadow) ────────────────────────────────────── */
+  --md-elevation-0: none;
+  --md-elevation-1: 0px 1px 2px rgba(0,0,0,0.30), 0px 1px 3px 1px rgba(0,0,0,0.15);
+  --md-elevation-2: 0px 1px 2px rgba(0,0,0,0.30), 0px 2px 6px 2px rgba(0,0,0,0.15);
+  --md-elevation-3: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px rgba(0,0,0,0.30);
+  --md-elevation-4: 0px 6px 10px 4px rgba(0,0,0,0.15), 0px 2px 3px rgba(0,0,0,0.30);
+  --md-elevation-5: 0px 8px 12px 6px rgba(0,0,0,0.15), 0px 4px 4px rgba(0,0,0,0.30);
 }
 
-/* ─── Dark mode (kept minimal — product is light-first) ────────────────────── */
+/* ─── Dark mode — M3 dark scheme ────────────────────────────────────────────── */
 .dark {
-  --background:         oklch(0.145 0 0);
-  --foreground:         oklch(0.985 0 0);
-  --card:               oklch(0.205 0 0);
-  --card-foreground:    oklch(0.985 0 0);
-  --popover:            oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary:            oklch(0.65 0.2 264);
-  --primary-foreground: oklch(0.145 0 0);
-  --secondary:          oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted:              oklch(0.269 0 0);
-  --muted-foreground:   oklch(0.708 0 0);
-  --accent:             oklch(0.269 0 0);
-  --accent-foreground:  oklch(0.985 0 0);
+  --background:         oklch(0.14 0.02 20);
+  --foreground:         oklch(0.92 0.006 20);
+  --card:               oklch(0.19 0.02 20);
+  --card-foreground:    oklch(0.92 0.006 20);
+  --popover:            oklch(0.19 0.02 20);
+  --popover-foreground: oklch(0.92 0.006 20);
+  --primary:            oklch(0.82 0.12 20);
+  --primary-foreground: oklch(0.28 0.15 20);
+  --secondary:          oklch(0.34 0.025 20);
+  --secondary-foreground: oklch(0.92 0.006 20);
+  --muted:              oklch(0.28 0.015 20);
+  --muted-foreground:   oklch(0.65 0.015 20);
+  --accent:             oklch(0.34 0.04 20);
+  --accent-foreground:  oklch(0.82 0.12 20);
   --destructive:        oklch(0.704 0.191 22.216);
-  --border:             oklch(1 0 0 / 10%);
-  --input:              oklch(1 0 0 / 15%);
-  --ring:               oklch(0.65 0.2 264);
-  --chart-1: oklch(0.65 0.2 264);
-  --chart-2: oklch(0.62 0.163 152);
-  --chart-3: oklch(0.70 0.21  47);
-  --chart-4: oklch(0.63 0.22  14);
-  --chart-5: oklch(0.62 0.19 294);
-  --sidebar:                    oklch(0.205 0 0);
-  --sidebar-foreground:         oklch(0.985 0 0);
-  --sidebar-primary:            oklch(0.65 0.2 264);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent:             oklch(0.269 0 0);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border:             oklch(1 0 0 / 10%);
-  --sidebar-ring:               oklch(0.65 0.2 264);
+  --border:             oklch(0.34 0.02 20);
+  --input:              oklch(0.46 0.02 20);
+  --ring:               oklch(0.82 0.12 20);
+  --chart-1: oklch(0.82 0.12 20);
+  --chart-2: oklch(0.85 0.12 80);
+  --chart-3: oklch(0.62 0.163 152);
+  --chart-4: oklch(0.62 0.19 294);
+  --chart-5: oklch(0.70 0.21 47);
+  --sidebar:                    oklch(0.19 0.02 20);
+  --sidebar-foreground:         oklch(0.92 0.006 20);
+  --sidebar-primary:            oklch(0.85 0.12 80);
+  --sidebar-primary-foreground: oklch(0.25 0.08 70);
+  --sidebar-accent:             oklch(0.28 0.015 20);
+  --sidebar-accent-foreground:  oklch(0.92 0.006 20);
+  --sidebar-border:             oklch(0.34 0.02 20);
+  --sidebar-ring:               oklch(0.85 0.12 80);
 }
 
 /* ─── Base layer ────────────────────────────────────────────────────────────── */
@@ -183,7 +236,11 @@ html, body { height: 100%; }
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background: linear-gradient(90deg,
+    oklch(0.94 0.012 20) 25%,
+    oklch(0.89 0.015 20) 50%,
+    oklch(0.94 0.012 20) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite;
 }

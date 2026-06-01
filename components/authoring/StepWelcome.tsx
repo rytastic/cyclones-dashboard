@@ -13,9 +13,7 @@ export default function StepWelcome({ onSubmit }: { onSubmit: (prompt: string) =
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
+  useEffect(() => { textareaRef.current?.focus(); }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && value.trim()) {
@@ -28,24 +26,41 @@ export default function StepWelcome({ onSubmit }: { onSubmit: (prompt: string) =
     <div className="w-full max-w-2xl animate-fade-up">
       {/* Hero */}
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-cardinal/10 border border-cardinal/20 rounded-full px-4 py-1.5 mb-6">
-          <div className="w-2 h-2 rounded-full bg-cardinal animate-pulse" />
-          <span className="text-cardinal text-xs font-semibold uppercase tracking-widest">AI Dashboard Builder</span>
+        {/* M3 Assist chip — "AI Dashboard Builder" badge */}
+        <div
+          className="inline-flex items-center gap-2 px-4 py-1.5 mb-6"
+          style={{
+            background: 'var(--md-primary-container)',
+            color: 'var(--md-on-primary-container)',
+            borderRadius: 'var(--md-shape-full)',
+          }}
+        >
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span className="text-xs font-semibold uppercase tracking-widest">AI Dashboard Builder</span>
         </div>
-        <h1 className="text-4xl font-bold text-white mb-3 leading-tight">
+
+        {/* M3 Display Small */}
+        <h1 className="text-4xl font-normal text-foreground mb-3 leading-tight tracking-[-0.25px]">
           What would you like<br />
-          <span className="text-gold">to build today?</span>
+          <span className="text-primary font-medium">to build today?</span>
         </h1>
-        <p className="text-slate-400 text-base">
+
+        {/* M3 Body Large */}
+        <p className="text-[var(--md-on-surface-variant)] text-base leading-6 tracking-[0.5px]">
           Describe your dashboard in plain English. Our AI will design and build it for you.
         </p>
       </div>
 
-      {/* Input card */}
+      {/* M3 Outlined text field (multiline) */}
       <div
-        className={`bg-slate-800 rounded-2xl border-2 transition-all duration-200 ${
-          focused ? 'border-cardinal shadow-lg shadow-cardinal/10' : 'border-slate-700'
-        }`}
+        className="bg-[var(--md-surface-container-low)] transition-all duration-200"
+        style={{
+          borderRadius: 'var(--md-shape-extra-large)',
+          border: focused
+            ? '2px solid var(--md-primary)'
+            : '1px solid var(--md-outline)',
+          boxShadow: 'var(--md-elevation-1)',
+        }}
       >
         <textarea
           ref={textareaRef}
@@ -56,18 +71,29 @@ export default function StepWelcome({ onSubmit }: { onSubmit: (prompt: string) =
           onBlur={() => setFocused(false)}
           placeholder="Build me a basketball stats dashboard for Iowa State Cyclones showing the last 5 seasons..."
           rows={4}
-          className="w-full bg-transparent text-slate-100 placeholder-slate-500 p-5 text-base resize-none outline-none leading-relaxed"
+          className="w-full bg-transparent text-foreground placeholder-[var(--md-on-surface-variant)] p-5 text-base resize-none outline-none leading-relaxed tracking-[0.5px]"
         />
+
+        {/* Action row */}
         <div className="flex items-center justify-between px-5 pb-4">
-          <span className="text-slate-600 text-xs">Press Enter to continue · Shift+Enter for new line</span>
+          <span className="text-[var(--md-on-surface-variant)] text-xs tracking-[0.4px]">
+            Enter to continue · Shift+Enter for new line
+          </span>
+
+          {/* M3 Filled button */}
           <button
             onClick={() => value.trim() && onSubmit(value.trim())}
             disabled={!value.trim()}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              value.trim()
-                ? 'bg-cardinal text-white hover:bg-cardinal-dark shadow-md shadow-cardinal/25 hover:shadow-lg hover:shadow-cardinal/30'
-                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-            }`}
+            className="flex items-center gap-2 text-sm font-medium tracking-[0.1px] transition-all duration-200"
+            style={{
+              padding: '10px 24px',
+              borderRadius: 'var(--md-shape-full)',
+              background: value.trim() ? 'var(--md-primary)' : 'var(--md-surface-variant)',
+              color: value.trim() ? 'var(--md-on-primary)' : 'var(--md-on-surface-variant)',
+              boxShadow: value.trim() ? 'var(--md-elevation-1)' : 'none',
+              opacity: value.trim() ? 1 : 0.6,
+              cursor: value.trim() ? 'pointer' : 'not-allowed',
+            }}
           >
             Generate Dashboard
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,17 +103,40 @@ export default function StepWelcome({ onSubmit }: { onSubmit: (prompt: string) =
         </div>
       </div>
 
-      {/* Suggestion chips */}
+      {/* M3 Suggestion chips */}
       <div className="mt-6">
-        <p className="text-slate-600 text-xs uppercase tracking-wider mb-3 text-center">Try one of these</p>
+        <p
+          className="text-xs uppercase tracking-[1px] mb-3 text-center"
+          style={{ color: 'var(--md-on-surface-variant)' }}
+        >
+          Try one of these
+        </p>
         <div className="flex flex-col gap-2">
           {SUGGESTIONS.map((s) => (
             <button
               key={s}
               onClick={() => { setValue(s); textareaRef.current?.focus(); }}
-              className="text-left px-4 py-3 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 text-sm hover:border-slate-600 hover:text-slate-300 hover:bg-slate-800 transition-all duration-150 group"
+              className="text-left text-sm transition-all duration-150 group"
+              style={{
+                padding: '12px 16px',
+                borderRadius: 'var(--md-shape-medium)',
+                border: '1px solid var(--md-outline-variant)',
+                background: 'var(--md-surface-container-low)',
+                color: 'var(--md-on-surface-variant)',
+                tracking: '0.25px',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--md-primary-container)';
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--md-primary)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--md-on-primary-container)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--md-surface-container-low)';
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--md-outline-variant)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--md-on-surface-variant)';
+              }}
             >
-              <span className="text-cardinal mr-2 group-hover:mr-3 transition-all duration-150">→</span>
+              <span className="text-primary mr-2 font-medium">→</span>
               {s}
             </button>
           ))}
