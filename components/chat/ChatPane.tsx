@@ -367,24 +367,21 @@ export default function ChatPane({
 
           <div className="my-3 border-t border-slate-200" />
 
-          {/* Context-aware suggestion pills */}
+          {/* Suggestion pills — max 3 */}
           <div className="flex flex-wrap gap-2">
-            {selectedWidgets.some(w => w.isChart) && (
-              <>
-                <SuggestionPill label="Change to bar chart" onSend={sendMessage} />
-                <SuggestionPill label="Change to line chart" onSend={sendMessage} />
-                <SuggestionPill label="Use ISU red" onSend={sendMessage} />
-              </>
-            )}
-            {selectedWidgets.some(w => w.id === 'leaderboard') && (
-              <>
-                <SuggestionPill label="Sort by rebounds" onSend={sendMessage} />
-                <SuggestionPill label="Show top 5 players" onSend={sendMessage} />
-              </>
-            )}
-            {selectedWidgets.some(w => w.id === 'stats') && (
-              <SuggestionPill label="Highlight top scorer" onSend={sendMessage} />
-            )}
+            {(() => {
+              const pills: string[] = [];
+              if (selectedWidgets.some(w => w.isChart)) {
+                pills.push('Change to bar chart', 'Change to line chart');
+              }
+              if (selectedWidgets.some(w => w.id === 'leaderboard')) {
+                pills.push('Sort by rebounds', 'Show top 5 players');
+              }
+              pills.push('Show rebounds', 'Highlight top scorer', 'Use ISU red');
+              return [...new Set(pills)].slice(0, 3).map(label => (
+                <SuggestionPill key={label} label={label} onSend={sendMessage} />
+              ));
+            })()}
           </div>
         </div>
       )}

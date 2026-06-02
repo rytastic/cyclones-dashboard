@@ -121,7 +121,7 @@ export default function TrendChart({
             {METRIC_LABELS[metric]} — Top 5 players over 5 seasons
           </p>
         </div>
-        <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-accent text-primary">
+        <span className="text-xs font-semibold px-2 py-1 rounded-md bg-slate-100 text-slate-600">
           {METRIC_LABELS[metric]}
         </span>
       </div>
