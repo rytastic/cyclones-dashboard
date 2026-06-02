@@ -35,6 +35,7 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
   const [chartMetric, setChartMetric] = useState<ChartMetric>('ppg');
   const [highlightedPlayer, setHighlightedPlayer] = useState<string | null>(null);
   const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
+  const [chatOpen, setChatOpen] = useState(true);
   const [trendChartType, setTrendChartType] = useState<'line' | 'bar'>('line');
   const [compChartType, setCompChartType] = useState<'bar' | 'line'>('bar');
   const [leaderboardSort, setLeaderboardSort] = useState<string>('ppg');
@@ -110,7 +111,7 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
-      {/* Sidebar — hidden when parent shell provides its own sidebar */}
+      {/* Left sidebar */}
       {!noSidebar && (
         <aside className="w-56 flex-shrink-0 bg-slate-900 flex flex-col border-r border-slate-800">
           <div className="px-5 py-5 border-b border-slate-800">
@@ -154,7 +155,6 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
 
       {/* Main scrollable content */}
       <main className="flex-1 overflow-y-auto min-w-0">
-        {/* Header */}
         <header className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-[#3b82f6] flex items-center justify-center shadow-sm flex-shrink-0">
@@ -172,6 +172,16 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
             </div>
           </div>
 
+          {/* Reopen button — only when pane is closed */}
+          {!isPreview && !chatOpen && (
+            <button
+              onClick={() => setChatOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-slate-900 hover:bg-slate-700 text-white text-xs font-medium transition-colors shadow-sm"
+            >
+              <StarIcon className="w-3.5 h-3.5" />
+              Data assistant
+            </button>
+          )}
         </header>
 
         {/* Deselect on background click */}
@@ -248,11 +258,12 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
         </div>
       </main>
 
-      {/* Right chat pane — always visible in dashboard mode */}
-      {!isPreview && (
+      {/* Right chat pane */}
+      {!isPreview && chatOpen && (
         <div className="w-96 flex-shrink-0 border-l border-slate-200 flex flex-col h-full">
           <ChatPane
             onCommand={handleCommand}
+            onClose={() => setChatOpen(false)}
             chartMetric={chartMetric}
             highlightedPlayer={resolvedHighlight}
             selectedWidget={widgetContext}
@@ -261,5 +272,13 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
         </div>
       )}
     </div>
+  );
+}
+
+function StarIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 0.5L9.8 6.2L15.5 8L9.8 9.8L8 15.5L6.2 9.8L0.5 8L6.2 6.2L8 0.5Z" />
+    </svg>
   );
 }
