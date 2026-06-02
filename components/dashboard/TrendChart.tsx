@@ -42,9 +42,15 @@ export default function TrendChart({ seasons, metric }: Props) {
     connectNulls: true,
   }));
 
+  // Shorten "First Last" → "First L." for compact legend labels
+  const shortName = (name: string) => {
+    const parts = name.trim().split(' ');
+    return parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : name;
+  };
+
   const option = {
     backgroundColor: 'transparent',
-    grid: { top: 16, right: 16, bottom: 48, left: 40, containLabel: false },
+    grid: { top: 16, right: 16, bottom: 60, left: 40, containLabel: false },
     tooltip: {
       trigger: 'axis',
       backgroundColor: '#1C1E21',
@@ -52,13 +58,38 @@ export default function TrendChart({ seasons, metric }: Props) {
       borderWidth: 1,
       textStyle: { color: '#E4E6EB', fontSize: 12 },
       axisPointer: { lineStyle: { color: '#E4E6EB', opacity: 0.3 } },
+      // Show full name in axis tooltip
+      formatter: (params: { seriesName: string; value: number; axisValue: string }[]) => {
+        if (!params?.length) return '';
+        const header = `<div style="margin-bottom:4px;font-size:11px;color:#9ca3af">${params[0].axisValue}</div>`;
+        const rows = params
+          .map(p => `<div style="display:flex;justify-content:space-between;gap:16px"><span>${p.seriesName}</span><span style="font-weight:600">${p.value}</span></div>`)
+          .join('');
+        return header + rows;
+      },
     },
     legend: {
-      bottom: 0,
+      // Scrollable single-row legend — shows ‹ › navigation when names overflow
+      type: 'scroll',
+      bottom: 4,
       textStyle: { color: '#65676B', fontSize: 11 },
       itemWidth: 14,
       itemHeight: 3,
       icon: 'roundRect',
+      pageIconColor: '#94a3b8',
+      pageIconInactiveColor: '#e2e8f0',
+      pageTextStyle: { color: '#94a3b8', fontSize: 11 },
+      // Truncate to "First L." in the label; full name shows in axis tooltip
+      formatter: shortName,
+      tooltip: {
+        show: true,
+        // Full name on hover over legend swatch
+        formatter: (params: { name: string }) => params.name,
+        backgroundColor: '#1e293b',
+        borderColor: '#334155',
+        textStyle: { color: '#e2e8f0', fontSize: 12 },
+        padding: [6, 10],
+      },
     },
     xAxis: {
       type: 'category',
@@ -90,7 +121,7 @@ export default function TrendChart({ seasons, metric }: Props) {
           {METRIC_LABELS[metric]}
         </span>
       </div>
-      <ReactECharts option={option} style={{ height: 260 }} notMerge />
+      <ReactECharts option={option} style={{ height: 280 }} notMerge />
     </div>
   );
 }
