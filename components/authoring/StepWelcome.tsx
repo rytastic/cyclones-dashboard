@@ -123,7 +123,7 @@ export default function StepWelcome({ onSubmit }: { onSubmit: (prompt: string) =
                 border: '1px solid var(--md-outline-variant)',
                 background: 'var(--md-surface-container-low)',
                 color: 'var(--md-on-surface-variant)',
-                tracking: '0.25px',
+                letterSpacing: '0.25px',
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.background = 'var(--md-primary-container)';
