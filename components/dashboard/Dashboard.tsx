@@ -331,12 +331,9 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
         {/* Deselect on background click */}
         <div className="px-8 py-6 space-y-6" onClick={() => setSelectedWidgets([])}>
 
-          {/* ── OVERVIEW: stats → charts → player cards → leaderboard ── */}
+          {/* ── OVERVIEW: charts → stats → player cards → leaderboard ── */}
           {layout === 'overview' && (
             <>
-              <SelectableWidget id="stats" selectedIds={selectedWidgets} pendingIds={pendingWidgetIds} onSelect={handleWidgetSelect}>
-                <StatsBar season={season} />
-              </SelectableWidget>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <SelectableWidget id="trend-chart" selectedIds={selectedWidgets} pendingIds={pendingWidgetIds} onSelect={handleWidgetSelect}>
                   <TrendChart seasons={data.seasons} metric={chartMetric} chartType={trendChartType} accentColor={accentColor} title={widgetTitles['trend-chart']} />
@@ -345,6 +342,9 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
                   <ComparisonChart season={season} metric={chartMetric} highlightedPlayer={resolvedHighlight} chartType={compChartType} accentColor={accentColor} title={widgetTitles['comparison-chart']} />
                 </SelectableWidget>
               </div>
+              <SelectableWidget id="stats" selectedIds={selectedWidgets} pendingIds={pendingWidgetIds} onSelect={handleWidgetSelect}>
+                <StatsBar season={season} />
+              </SelectableWidget>
               <SelectableWidget id="player-cards" selectedIds={selectedWidgets} pendingIds={pendingWidgetIds} onSelect={handleWidgetSelect}>
                 <div className="bg-white rounded-xl border border-slate-200 p-5">
                   <h2 className="text-slate-800 font-bold text-sm uppercase tracking-wider mb-3">Top Performers · {season.year}</h2>
