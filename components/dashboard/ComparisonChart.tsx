@@ -4,14 +4,25 @@ import ReactECharts from 'echarts-for-react';
 import type { Season, ChartMetric } from './types';
 import { METRIC_LABELS, METRIC_SHORT } from './types';
 
+type ChartType = 'bar' | 'line';
+
 interface Props {
   season: Season;
   metric: ChartMetric;
   highlightedPlayer: string | null;
+  chartType?: ChartType;
+  accentColor?: string;
+  title?: string;
 }
 
-export default function ComparisonChart({ season, metric, highlightedPlayer }: Props) {
-  const primaryColor = '#3b82f6';
+export default function ComparisonChart({
+  season,
+  metric,
+  highlightedPlayer,
+  chartType = 'bar',
+  accentColor = '#3b82f6',
+  title,
+}: Props) {
   const dimColor = '#cbd5e1';
 
   const data = [...season.players]
@@ -21,6 +32,37 @@ export default function ComparisonChart({ season, metric, highlightedPlayer }: P
       fullName: p.name,
       value: +p[metric].toFixed(1),
     }));
+
+  const seriesData = data.map(d => {
+    const isHl = highlightedPlayer !== null &&
+      d.fullName.toLowerCase().includes(highlightedPlayer.toLowerCase());
+    return {
+      value: d.value,
+      itemStyle: {
+        color: isHl ? accentColor : (chartType === 'line' ? accentColor : dimColor),
+        opacity: highlightedPlayer && !isHl ? 0.45 : 1,
+        ...(chartType === 'bar' ? { borderRadius: [4, 4, 0, 0] } : {}),
+      },
+    };
+  });
+
+  const seriesBase = {
+    data: seriesData,
+    barMaxWidth: 40,
+  };
+
+  const series =
+    chartType === 'line'
+      ? [{
+          ...seriesBase,
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 7,
+          lineStyle: { width: 2.5, color: accentColor },
+          areaStyle: { color: accentColor, opacity: 0.07 },
+        }]
+      : [{ ...seriesBase, type: 'bar' }];
 
   const option = {
     backgroundColor: 'transparent',
@@ -52,40 +94,30 @@ export default function ComparisonChart({ season, metric, highlightedPlayer }: P
       splitLine: { lineStyle: { color: '#f1f5f9' } },
       axisLabel: { color: '#94a3b8', fontSize: 11 },
     },
-    series: [
-      {
-        type: 'bar',
-        data: data.map(d => {
-          const isHl = highlightedPlayer !== null &&
-            d.fullName.toLowerCase().includes(highlightedPlayer.toLowerCase());
-          return {
-            value: d.value,
-            itemStyle: {
-              color: isHl ? primaryColor : dimColor,
-              opacity: highlightedPlayer && !isHl ? 0.5 : 1,
-              borderRadius: [4, 4, 0, 0],
-            },
-          };
-        }),
-        barMaxWidth: 40,
-      },
-    ],
+    series,
   };
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-slate-800 font-semibold text-sm">Player Comparison</h3>
+          <h3 className="text-slate-800 font-semibold text-sm">{title ?? 'Player Comparison'}</h3>
           <p className="text-slate-400 text-xs mt-0.5">
             {season.year} · {METRIC_LABELS[metric]}
           </p>
         </div>
-        <div className="text-xs font-semibold px-2 py-1 rounded-md bg-slate-100 text-slate-600">
-          {METRIC_SHORT[metric]}
+        <div className="flex items-center gap-2">
+          <span
+            className="text-xs font-medium px-2 py-0.5 rounded-full capitalize"
+            style={{ background: `${accentColor}20`, color: accentColor }}
+          >
+            {chartType}
+          </span>
+          <span className="text-xs font-semibold px-2 py-1 rounded-md bg-slate-100 text-slate-600">
+            {METRIC_SHORT[metric]}
+          </span>
         </div>
       </div>
-
       <ReactECharts option={option} style={{ height: 260 }} notMerge />
     </div>
   );

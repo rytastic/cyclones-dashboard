@@ -11,8 +11,18 @@ interface Message {
 }
 
 export interface ParsedCommand {
-  type: 'setMetric' | 'highlight' | 'clearHighlight' | 'setSeason';
+  type:
+    | 'setMetric'
+    | 'highlight'
+    | 'clearHighlight'
+    | 'setSeason'
+    | 'setChartType'
+    | 'setSort'
+    | 'setLimit'
+    | 'setAccentColor'
+    | 'setWidgetTitle';
   value?: string;
+  widgetId?: string;
 }
 
 export interface WidgetContext {
@@ -29,28 +39,54 @@ interface Props {
   onClearWidget: () => void;
 }
 
+// ─── command parsing ──────────────────────────────────────────────────────────
+
 const METRIC_TRIGGERS: { patterns: RegExp[]; metric: ChartMetric; label: string }[] = [
-  { patterns: [/rebound/i, /\brbg\b/i, /\brpg\b/i], metric: 'rpg', label: 'Rebounds Per Game' },
-  { patterns: [/assist/i, /\bapg\b/i], metric: 'apg', label: 'Assists Per Game' },
-  { patterns: [/steal/i, /\bspg\b/i, /\bstl\b/i], metric: 'spg', label: 'Steals Per Game' },
-  { patterns: [/\bpoint/i, /\bscoring\b/i, /\bppg\b/i], metric: 'ppg', label: 'Points Per Game' },
+  { patterns: [/\brebound/i, /\brpg\b/i], metric: 'rpg', label: 'Rebounds Per Game' },
+  { patterns: [/\bassist/i, /\bapg\b/i], metric: 'apg', label: 'Assists Per Game' },
+  { patterns: [/\bsteal/i, /\bspg\b/i, /\bstl\b/i], metric: 'spg', label: 'Steals Per Game' },
+  { patterns: [/\bpoints?\b/i, /\bscoring\b/i, /\bppg\b/i], metric: 'ppg', label: 'Points Per Game' },
+];
+
+const SORT_TRIGGERS: { patterns: RegExp[]; key: string; label: string }[] = [
+  { patterns: [/sort.*\bpoints?\b/i, /sort.*\bppg\b/i, /sort.*\bscor/i], key: 'ppg', label: 'points' },
+  { patterns: [/sort.*\brebound/i, /sort.*\brpg\b/i], key: 'rpg', label: 'rebounds' },
+  { patterns: [/sort.*\bassist/i, /sort.*\bapg\b/i], key: 'apg', label: 'assists' },
+  { patterns: [/sort.*\bsteal/i, /sort.*\bspg\b/i], key: 'spg', label: 'steals' },
+  { patterns: [/sort.*\bblock/i, /sort.*\bbpg\b/i], key: 'bpg', label: 'blocks' },
+  { patterns: [/sort.*\bminut/i, /sort.*\bmpg\b/i], key: 'mpg', label: 'minutes' },
+  { patterns: [/sort.*\bfg%/i, /sort.*\bfield goal/i], key: 'fgPct', label: 'FG%' },
+  { patterns: [/sort.*\bname/i, /sort.*\balpha/i], key: 'name', label: 'name' },
+];
+
+const COLOR_TRIGGERS: { patterns: RegExp[]; value: string; label: string }[] = [
+  { patterns: [/\bred\b/i, /\bisu\b/i, /\bcardinal\b/i], value: '#C8102E', label: 'ISU cardinal red' },
+  { patterns: [/\bblue\b/i], value: '#3b82f6', label: 'blue' },
+  { patterns: [/\bgreen\b/i], value: '#22c55e', label: 'green' },
+  { patterns: [/\bpurple\b/i], value: '#a855f7', label: 'purple' },
+  { patterns: [/\bgold\b/i, /\byellow\b/i], value: '#f59e0b', label: 'gold' },
+  { patterns: [/\borange\b/i], value: '#f97316', label: 'orange' },
 ];
 
 const HIGHLIGHT_TRIGGER = /highlight\s+([\w\s]+?)(?:\s+in|\s+on|\s*$)/i;
 const TOP_SCORER_TRIGGER = /highlight.*\btop\s+scor/i;
 const CLEAR_TRIGGER = /clear|remove|reset\s+highlight/i;
 
-function parseCommand(input: string): { command: ParsedCommand; response: string } | null {
+function parseCommand(
+  input: string,
+  selectedWidget: WidgetContext | null,
+): { command: ParsedCommand; response: string } | null {
+  // ── highlight / clear (check before metric so "scorer" doesn't match PPG) ──
   if (CLEAR_TRIGGER.test(input)) {
     return {
       command: { type: 'clearHighlight' },
-      response: "Cleared! The player highlight has been removed from the table and charts.",
+      response: 'Cleared! The player highlight has been removed.',
     };
   }
   if (TOP_SCORER_TRIGGER.test(input)) {
     return {
       command: { type: 'highlight', value: '__top_scorer__' },
-      response: "Got it! I've highlighted the top scorer in the leaderboard and player cards.",
+      response: "Done! I've highlighted the top scorer in the leaderboard and player cards.",
     };
   }
   const hlMatch = input.match(HIGHLIGHT_TRIGGER);
@@ -58,23 +94,104 @@ function parseCommand(input: string): { command: ParsedCommand; response: string
     const name = hlMatch[1].trim();
     return {
       command: { type: 'highlight', value: name },
-      response: `Done! Highlighting **${name}** across the leaderboard and player comparison chart.`,
+      response: `Done! Highlighting **${name}** across the leaderboard and comparison chart.`,
     };
   }
+
+  // ── chart type ─────────────────────────────────────────────────────────────
+  if (/\bbar\b.*chart|\bbar\b.*graph|switch.*\bbar\b|change.*\bbar\b|as bars?\b|to bar\b/i.test(input)) {
+    const widgetId = selectedWidget?.isChart ? selectedWidget.id : 'trend-chart';
+    const label = selectedWidget?.isChart ? selectedWidget.label : 'Chart 1 · Scoring Trend';
+    return {
+      command: { type: 'setChartType', value: 'bar', widgetId },
+      response: `Switched **${label}** to a bar chart.`,
+    };
+  }
+  if (/\bline\b.*chart|\bline\b.*graph|switch.*\bline\b|change.*\bline\b|as lines?\b|to line\b/i.test(input)) {
+    const widgetId = selectedWidget?.isChart ? selectedWidget.id : 'trend-chart';
+    const label = selectedWidget?.isChart ? selectedWidget.label : 'Chart 1 · Scoring Trend';
+    return {
+      command: { type: 'setChartType', value: 'line', widgetId },
+      response: `Switched **${label}** to a line chart.`,
+    };
+  }
+
+  // ── leaderboard sort ───────────────────────────────────────────────────────
+  for (const { patterns, key, label } of SORT_TRIGGERS) {
+    if (patterns.some(p => p.test(input))) {
+      return {
+        command: { type: 'setSort', value: key },
+        response: `Sorted the leaderboard by **${label}**.`,
+      };
+    }
+  }
+
+  // ── leaderboard row limit ──────────────────────────────────────────────────
+  const topNMatch = input.match(/top\s+(\d+)\s*player|show\s+(\d+)\s*player|show\s+top\s+(\d+)/i);
+  if (topNMatch) {
+    const n = parseInt(topNMatch[1] ?? topNMatch[2] ?? topNMatch[3]);
+    return {
+      command: { type: 'setLimit', value: String(n) },
+      response: `Showing the top **${n} players** in the leaderboard.`,
+    };
+  }
+  if (/show\s+all|all\s+player|reset\s+(?:limit|filter)|full\s+leaderboard/i.test(input)) {
+    return {
+      command: { type: 'setLimit', value: '' },
+      response: 'Showing all players in the leaderboard.',
+    };
+  }
+
+  // ── accent color ───────────────────────────────────────────────────────────
+  if (/color|theme|accent/i.test(input)) {
+    for (const { patterns, value, label } of COLOR_TRIGGERS) {
+      if (patterns.some(p => p.test(input))) {
+        return {
+          command: { type: 'setAccentColor', value },
+          response: `Updated the chart accent to **${label}**.`,
+        };
+      }
+    }
+  }
+
+  // ── widget title rename ────────────────────────────────────────────────────
+  const renameMatch = input.match(
+    /rename.*?to\s+["']?(.+?)["']?\s*$|set.*?title.*?to\s+["']?(.+?)["']?\s*$|call\s+(?:it|this)\s+["']?(.+?)["']?\s*$/i,
+  );
+  if (renameMatch && selectedWidget) {
+    const newTitle = (renameMatch[1] ?? renameMatch[2] ?? renameMatch[3])?.trim();
+    if (newTitle) {
+      return {
+        command: { type: 'setWidgetTitle', value: newTitle, widgetId: selectedWidget.id },
+        response: `Renamed **${selectedWidget.label}** to **${newTitle}**.`,
+      };
+    }
+  }
+
+  // ── metric changes (after sort so "sort by points" ≠ metric change) ───────
   for (const { patterns, metric, label } of METRIC_TRIGGERS) {
     if (patterns.some(p => p.test(input))) {
       return {
         command: { type: 'setMetric', value: metric },
-        response: `Done! Updated both charts to show **${label}**.`,
+        response: `Updated both charts to show **${label}**.`,
       };
     }
   }
+
   return null;
 }
 
+// ─── component ────────────────────────────────────────────────────────────────
+
 let msgIdCounter = 10;
 
-export default function ChatPane({ onCommand, chartMetric, highlightedPlayer, selectedWidget, onClearWidget }: Props) {
+export default function ChatPane({
+  onCommand,
+  chartMetric,
+  highlightedPlayer,
+  selectedWidget,
+  onClearWidget,
+}: Props) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -99,17 +216,17 @@ export default function ChatPane({ onCommand, chartMetric, highlightedPlayer, se
     setInput('');
     setIsTyping(true);
 
-    await new Promise(r => setTimeout(r, 600 + Math.random() * 400));
+    await new Promise(r => setTimeout(r, 500 + Math.random() * 400));
     setIsTyping(false);
 
-    const result = parseCommand(text);
+    const result = parseCommand(text, selectedWidget);
     let responseText: string;
 
     if (result) {
       onCommand(result.command);
       responseText = result.response;
     } else {
-      responseText = `I hear you — try asking me to change the chart metric (points, rebounds, assists, steals) or highlight a player by name. Full AI editing coming soon!`;
+      responseText = buildFallback(text, selectedWidget);
     }
 
     setMessages(prev => [
@@ -197,16 +314,39 @@ export default function ChatPane({ onCommand, chartMetric, highlightedPlayer, se
               <p className="text-xs font-medium text-slate-700">{selectedWidget.label}</p>
             </div>
           </div>
-          {selectedWidget.isChart && (
-            <div className="mt-2.5">
-              <button
-                onClick={() => sendMessage('Change to bar chart')}
-                className="inline-flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded-full transition-colors"
-              >
-                Change to bar chart
-              </button>
-            </div>
-          )}
+
+          {/* Context-aware suggestions */}
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {selectedWidget.isChart && (
+              <>
+                <SuggestionPill label="Change to bar chart" onSend={sendMessage} />
+                <SuggestionPill label="Change to line chart" onSend={sendMessage} />
+                <SuggestionPill label="Use ISU red" onSend={sendMessage} />
+              </>
+            )}
+            {selectedWidget.id === 'leaderboard' && (
+              <>
+                <SuggestionPill label="Sort by rebounds" onSend={sendMessage} />
+                <SuggestionPill label="Show top 5 players" onSend={sendMessage} />
+              </>
+            )}
+            {selectedWidget.id === 'stats' && (
+              <SuggestionPill label="Highlight top scorer" onSend={sendMessage} />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Global suggestions when nothing selected */}
+      {!selectedWidget && (
+        <div className="px-4 pb-3 flex-shrink-0">
+          <p className="text-[10px] text-slate-400 uppercase tracking-wide font-medium mb-2">Try asking…</p>
+          <div className="flex flex-wrap gap-2">
+            <SuggestionPill label="Show rebounds" onSend={sendMessage} />
+            <SuggestionPill label="Highlight top scorer" onSend={sendMessage} />
+            <SuggestionPill label="Sort by assists" onSend={sendMessage} />
+            <SuggestionPill label="Use ISU red" onSend={sendMessage} />
+          </div>
         </div>
       )}
 
@@ -222,7 +362,7 @@ export default function ChatPane({ onCommand, chartMetric, highlightedPlayer, se
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendMessage(input)}
-            placeholder="Ask the data assistant..."
+            placeholder="Ask the data assistant…"
             className="flex-1 bg-transparent text-slate-800 placeholder-slate-400 text-sm outline-none"
           />
           <button
@@ -234,6 +374,32 @@ export default function ChatPane({ onCommand, chartMetric, highlightedPlayer, se
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── helpers ──────────────────────────────────────────────────────────────────
+
+function buildFallback(text: string, selectedWidget: WidgetContext | null): string {
+  const ctx = selectedWidget ? ` for **${selectedWidget.label}**` : '';
+  return (
+    `I can't do "${text}"${ctx} yet — here's what I can help with:\n` +
+    `• **Chart type** — "change to bar chart" / "switch to line chart"\n` +
+    `• **Metric** — "show rebounds", "switch to assists"\n` +
+    `• **Highlight** — "highlight Tamin Lipsey", "highlight top scorer"\n` +
+    `• **Leaderboard** — "sort by rebounds", "show top 5 players"\n` +
+    `• **Colors** — "use ISU red", "use green theme"\n` +
+    `• **Rename** — select a widget, then "rename to My Chart"`
+  );
+}
+
+function SuggestionPill({ label, onSend }: { label: string; onSend: (t: string) => void }) {
+  return (
+    <button
+      onClick={() => onSend(label)}
+      className="inline-flex items-center px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded-full transition-colors"
+    >
+      {label}
+    </button>
   );
 }
 
@@ -273,7 +439,11 @@ function StarIcon({ className }: { className?: string }) {
 function PaperclipIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+      />
     </svg>
   );
 }

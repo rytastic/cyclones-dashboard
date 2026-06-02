@@ -35,16 +35,28 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
   const [chartMetric, setChartMetric] = useState<ChartMetric>('ppg');
   const [highlightedPlayer, setHighlightedPlayer] = useState<string | null>(null);
   const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
+  const [trendChartType, setTrendChartType] = useState<'line' | 'bar'>('line');
+  const [compChartType, setCompChartType] = useState<'bar' | 'line'>('bar');
+  const [leaderboardSort, setLeaderboardSort] = useState<string>('ppg');
+  const [leaderboardLimit, setLeaderboardLimit] = useState<number | null>(null);
+  const [accentColor, setAccentColor] = useState<string>('#3b82f6');
+  const [widgetTitles, setWidgetTitles] = useState<Record<string, string>>({});
 
   const handleWidgetSelect = (id: string) => {
     setSelectedWidget(prev => (prev === id ? null : id));
   };
 
-  // Reset to the team's latest season whenever teamId changes
+  // Reset all editable state whenever teamId changes
   useEffect(() => {
     setSelectedYear(data.seasons[data.seasons.length - 1].year);
     setHighlightedPlayer(null);
     setSelectedWidget(null);
+    setTrendChartType('line');
+    setCompChartType('bar');
+    setLeaderboardSort('ppg');
+    setLeaderboardLimit(null);
+    setAccentColor('#3b82f6');
+    setWidgetTitles({});
   }, [teamId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const season = useMemo(
@@ -74,6 +86,24 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
         break;
       case 'clearHighlight':
         setHighlightedPlayer(null);
+        break;
+      case 'setChartType':
+        if (cmd.widgetId === 'trend-chart') setTrendChartType(cmd.value as 'line' | 'bar');
+        else if (cmd.widgetId === 'comparison-chart') setCompChartType(cmd.value as 'bar' | 'line');
+        break;
+      case 'setSort':
+        setLeaderboardSort(cmd.value ?? 'ppg');
+        break;
+      case 'setLimit':
+        setLeaderboardLimit(cmd.value ? parseInt(cmd.value) : null);
+        break;
+      case 'setAccentColor':
+        setAccentColor(cmd.value ?? '#3b82f6');
+        break;
+      case 'setWidgetTitle':
+        if (cmd.widgetId && cmd.value) {
+          setWidgetTitles(prev => ({ ...prev, [cmd.widgetId!]: cmd.value! }));
+        }
         break;
     }
   };
@@ -152,10 +182,23 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <SelectableWidget id="trend-chart" selectedId={selectedWidget} onSelect={handleWidgetSelect}>
-              <TrendChart seasons={data.seasons} metric={chartMetric} />
+              <TrendChart
+                seasons={data.seasons}
+                metric={chartMetric}
+                chartType={trendChartType}
+                accentColor={accentColor}
+                title={widgetTitles['trend-chart']}
+              />
             </SelectableWidget>
             <SelectableWidget id="comparison-chart" selectedId={selectedWidget} onSelect={handleWidgetSelect}>
-              <ComparisonChart season={season} metric={chartMetric} highlightedPlayer={resolvedHighlight} />
+              <ComparisonChart
+                season={season}
+                metric={chartMetric}
+                highlightedPlayer={resolvedHighlight}
+                chartType={compChartType}
+                accentColor={accentColor}
+                title={widgetTitles['comparison-chart']}
+              />
             </SelectableWidget>
           </div>
 
@@ -195,6 +238,8 @@ export default function Dashboard({ isPreview = false, noSidebar = false, teamId
                 players={season.players}
                 highlightedPlayer={resolvedHighlight}
                 chartMetric={chartMetric}
+                externalSortKey={leaderboardSort}
+                limit={leaderboardLimit}
               />
             </div>
           </SelectableWidget>

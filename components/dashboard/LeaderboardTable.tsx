@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Player } from './types';
 import type { ChartMetric } from './types';
 
@@ -10,6 +10,8 @@ interface Props {
   players: Player[];
   highlightedPlayer: string | null;
   chartMetric: ChartMetric;
+  externalSortKey?: string;
+  limit?: number | null;
 }
 
 const COLUMNS: { key: SortKey; label: string; width: string }[] = [
@@ -25,9 +27,17 @@ const COLUMNS: { key: SortKey; label: string; width: string }[] = [
   { key: 'mpg', label: 'MPG', width: 'w-16' },
 ];
 
-export default function LeaderboardTable({ players, highlightedPlayer, chartMetric }: Props) {
+export default function LeaderboardTable({ players, highlightedPlayer, chartMetric, externalSortKey, limit }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('ppg');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  // Sync when an external command changes the sort
+  useEffect(() => {
+    if (externalSortKey && COLUMNS.some(c => c.key === externalSortKey)) {
+      setSortKey(externalSortKey as SortKey);
+      setSortDir(externalSortKey === 'name' ? 'asc' : 'desc');
+    }
+  }, [externalSortKey]);
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -47,18 +57,22 @@ export default function LeaderboardTable({ players, highlightedPlayer, chartMetr
     return sortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number);
   });
 
+  const displayed = limit != null ? sorted.slice(0, limit) : sorted;
+
   const accent = '#3b82f6';
   const accentLight = 'bg-blue-50 border-blue-200';
   const accentText = 'text-[#3b82f6]';
 
-  // The column matching the current chart metric gets a subtle highlight
-  const metricToColumn: Record<ChartMetric, SortKey> = {
-    ppg: 'ppg', rpg: 'rpg', apg: 'apg', spg: 'spg',
-  };
+  const metricToColumn: Record<ChartMetric, SortKey> = { ppg: 'ppg', rpg: 'rpg', apg: 'apg', spg: 'spg' };
   const highlightCol = metricToColumn[chartMetric];
 
   return (
     <div className="rounded-xl overflow-hidden border border-slate-100">
+      {limit != null && limit < players.length && (
+        <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 text-xs text-slate-400">
+          Showing top {limit} of {players.length} players
+        </div>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -88,7 +102,7 @@ export default function LeaderboardTable({ players, highlightedPlayer, chartMetr
             </tr>
           </thead>
           <tbody>
-            {sorted.map((player, idx) => {
+            {displayed.map((player, idx) => {
               const isHighlighted = highlightedPlayer !== null &&
                 player.name.toLowerCase().includes(highlightedPlayer.toLowerCase());
               const isTop = idx === 0 && sortKey === 'ppg' && sortDir === 'desc';
@@ -97,9 +111,7 @@ export default function LeaderboardTable({ players, highlightedPlayer, chartMetr
                 <tr
                   key={player.name}
                   className={`border-b border-slate-100 last:border-0 transition-all duration-300 ${
-                    isHighlighted
-                      ? `${accentLight} border-l-2`
-                      : 'hover:bg-slate-50'
+                    isHighlighted ? `${accentLight} border-l-2` : 'hover:bg-slate-50'
                   }`}
                   style={isHighlighted ? { borderLeftColor: accent } : {}}
                 >

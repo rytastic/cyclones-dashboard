@@ -2,19 +2,27 @@
 
 import ReactECharts from 'echarts-for-react';
 import type { Season, ChartMetric } from './types';
-import { METRIC_LABELS, METRIC_SHORT } from './types';
+import { METRIC_LABELS } from './types';
+
+type ChartType = 'line' | 'bar';
 
 interface Props {
   seasons: Season[];
   metric: ChartMetric;
+  chartType?: ChartType;
+  accentColor?: string;
+  title?: string;
 }
 
 const PALETTE = ['#31A24C', '#F02849', '#FFAD0F', '#8A3FC7', '#0866FF'];
 
-export default function TrendChart({ seasons, metric }: Props) {
-  const primaryColor = '#3b82f6';
-
-  // Build top-5 players by their peak value of the metric
+export default function TrendChart({
+  seasons,
+  metric,
+  chartType = 'line',
+  accentColor = '#3b82f6',
+  title,
+}: Props) {
   const allNames = Array.from(new Set(seasons.flatMap(s => s.players.map(p => p.name))));
   const topPlayers = allNames
     .map(name => ({
@@ -25,24 +33,24 @@ export default function TrendChart({ seasons, metric }: Props) {
     .slice(0, 5)
     .map(p => p.name);
 
-  const xAxis = seasons.map(s => s.year);
+  const series = topPlayers.map((name, i) => {
+    const color = i === 0 ? accentColor : PALETTE[i];
+    const base = {
+      name,
+      type: chartType,
+      itemStyle: { color },
+      data: seasons.map(s => {
+        const p = s.players.find(pl => pl.name === name);
+        return p ? +p[metric].toFixed(1) : null;
+      }),
+      connectNulls: true,
+    };
+    if (chartType === 'line') {
+      return { ...base, smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: i === 0 ? 2.5 : 1.5, color } };
+    }
+    return { ...base, barMaxWidth: 18, itemStyle: { color, borderRadius: [3, 3, 0, 0] } };
+  });
 
-  const series = topPlayers.map((name, i) => ({
-    name,
-    type: 'line',
-    smooth: true,
-    symbol: 'circle',
-    symbolSize: 6,
-    lineStyle: { width: i === 0 ? 2.5 : 1.5 },
-    itemStyle: { color: i === 0 ? primaryColor : PALETTE[i] },
-    data: seasons.map(s => {
-      const p = s.players.find(pl => pl.name === name);
-      return p ? +p[metric].toFixed(1) : null;
-    }),
-    connectNulls: true,
-  }));
-
-  // Shorten "First Last" → "First L." for compact legend labels
   const shortName = (name: string) => {
     const parts = name.trim().split(' ');
     return parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : name;
@@ -58,7 +66,6 @@ export default function TrendChart({ seasons, metric }: Props) {
       borderWidth: 1,
       textStyle: { color: '#E4E6EB', fontSize: 12 },
       axisPointer: { lineStyle: { color: '#E4E6EB', opacity: 0.3 } },
-      // Show full name in axis tooltip
       formatter: (params: { seriesName: string; value: number; axisValue: string }[]) => {
         if (!params?.length) return '';
         const header = `<div style="margin-bottom:4px;font-size:11px;color:#9ca3af">${params[0].axisValue}</div>`;
@@ -69,7 +76,6 @@ export default function TrendChart({ seasons, metric }: Props) {
       },
     },
     legend: {
-      // Scrollable single-row legend — shows ‹ › navigation when names overflow
       type: 'scroll',
       bottom: 4,
       textStyle: { color: '#65676B', fontSize: 11 },
@@ -79,11 +85,9 @@ export default function TrendChart({ seasons, metric }: Props) {
       pageIconColor: '#94a3b8',
       pageIconInactiveColor: '#e2e8f0',
       pageTextStyle: { color: '#94a3b8', fontSize: 11 },
-      // Truncate to "First L." in the label; full name shows in axis tooltip
       formatter: shortName,
       tooltip: {
         show: true,
-        // Full name on hover over legend swatch
         formatter: (params: { name: string }) => params.name,
         backgroundColor: '#1e293b',
         borderColor: '#334155',
@@ -93,7 +97,7 @@ export default function TrendChart({ seasons, metric }: Props) {
     },
     xAxis: {
       type: 'category',
-      data: xAxis,
+      data: seasons.map(s => s.year),
       axisLine: { lineStyle: { color: '#E4E6EB' } },
       axisTick: { show: false },
       axisLabel: { color: '#65676B', fontSize: 11 },
@@ -112,14 +116,22 @@ export default function TrendChart({ seasons, metric }: Props) {
     <div className="bg-white border border-slate-200 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-foreground font-semibold text-sm">Season Trend</h3>
+          <h3 className="text-foreground font-semibold text-sm">{title ?? 'Season Trend'}</h3>
           <p className="text-muted-foreground text-xs mt-0.5">
             {METRIC_LABELS[metric]} — Top 5 players over 5 seasons
           </p>
         </div>
-        <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">
-          {METRIC_SHORT[metric]}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className="text-xs font-medium px-2 py-0.5 rounded-full capitalize"
+            style={{ background: `${accentColor}20`, color: accentColor }}
+          >
+            {chartType}
+          </span>
+          <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-accent text-primary">
+            {METRIC_LABELS[metric]}
+          </span>
+        </div>
       </div>
       <ReactECharts option={option} style={{ height: 280 }} notMerge />
     </div>
