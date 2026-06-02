@@ -66,8 +66,8 @@
   --popover:            oklch(0.99 0.004 20);
   --popover-foreground: oklch(0.17 0.015 20);
 
-  /* Primary — Iowa State Cardinal #C8102E */
-  --primary:            oklch(0.47 0.22 20);
+  /* Primary — Blue */
+  --primary:            oklch(0.55 0.20 256);
   --primary-foreground: oklch(1 0 0);
 
   /* Secondary — Gold tonal surface */
@@ -86,10 +86,10 @@
   --destructive:        oklch(0.577 0.245 27.325);
   --border:             oklch(0.86 0.015 20);   /* outline-variant      */
   --input:              oklch(0.55 0.025 20);   /* outline              */
-  --ring:               oklch(0.47 0.22 20);    /* cardinal focus ring  */
+  --ring:               oklch(0.55 0.20 256);   /* blue focus ring      */
 
-  /* Charts — Cyclones palette */
-  --chart-1: oklch(0.47 0.22 20);   /* Cardinal red  */
+  /* Charts — palette */
+  --chart-1: oklch(0.55 0.20 256);  /* Primary blue  */
   --chart-2: oklch(0.76 0.15 80);   /* Iowa State Gold */
   --chart-3: oklch(0.56 0.163 152); /* green         */
   --chart-4: oklch(0.51 0.19 294);  /* purple        */
@@ -106,10 +106,10 @@
   --sidebar-ring:               oklch(0.76 0.15 80);
 
   /* ── M3 extended color roles ──────────────────────────────────────────── */
-  --md-primary:                oklch(0.47 0.22 20);
+  --md-primary:                oklch(0.55 0.20 256);
   --md-on-primary:             oklch(1 0 0);
-  --md-primary-container:      oklch(0.94 0.04 20);
-  --md-on-primary-container:   oklch(0.20 0.12 20);
+  --md-primary-container:      oklch(0.92 0.06 256);
+  --md-on-primary-container:   oklch(0.18 0.14 256);
 
   --md-secondary:              oklch(0.48 0.10 80);
   --md-on-secondary:           oklch(1 0 0);
@@ -139,7 +139,7 @@
 
   --md-inverse-surface:        oklch(0.28 0.018 20);
   --md-inverse-on-surface:     oklch(0.92 0.005 20);
-  --md-inverse-primary:        oklch(0.82 0.12 20);
+  --md-inverse-primary:        oklch(0.78 0.14 256);
 
   /* ── M3 shape tokens ───────────────────────────────────────────────────── */
   --md-shape-none:         0px;

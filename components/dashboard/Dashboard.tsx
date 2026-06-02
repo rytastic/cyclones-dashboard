@@ -14,9 +14,10 @@ const data = cyclonesData as CyclonesData;
 
 interface Props {
   isPreview?: boolean;
+  noSidebar?: boolean;
 }
 
-export default function Dashboard({ isPreview = false }: Props) {
+export default function Dashboard({ isPreview = false, noSidebar = false }: Props) {
   const [selectedYear, setSelectedYear] = useState(data.seasons[data.seasons.length - 1].year);
   const [chartMetric, setChartMetric] = useState<ChartMetric>('ppg');
   const [highlightedPlayer, setHighlightedPlayer] = useState<string | null>(null);
@@ -59,8 +60,8 @@ export default function Dashboard({ isPreview = false }: Props) {
 
   return (
     <div className="flex h-full min-h-screen bg-slate-50 font-sans">
-      {/* Sidebar */}
-      <aside className="w-56 flex-shrink-0 bg-slate-900 flex flex-col border-r border-slate-800">
+      {/* Sidebar — hidden when parent shell provides its own sidebar */}
+      {!noSidebar && <aside className="w-56 flex-shrink-0 bg-slate-900 flex flex-col border-r border-slate-800">
         {/* Logo */}
         <div className="px-5 py-5 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -116,7 +117,7 @@ export default function Dashboard({ isPreview = false }: Props) {
             </button>
           </div>
         )}
-      </aside>
+      </aside>}
 
       {/* Main content */}
       <main

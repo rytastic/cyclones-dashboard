@@ -1,127 +1,203 @@
 'use client';
 
 import { useState } from 'react';
-import StepWelcome from './StepWelcome';
-import StepConfirmation from './StepConfirmation';
+import AppSidebar, { type NavSection } from '@/components/shared/AppSidebar';
+import StepDataSource from './StepDataSource';
+import StepBreakdown from './StepBreakdown';
 import StepBuilding from './StepBuilding';
-import StepPreview from './StepPreview';
+import PromptInput from './PromptInput';
 import Dashboard from '@/components/dashboard/Dashboard';
 
-export type Step = 'welcome' | 'confirmation' | 'building' | 'preview' | 'published';
+type Step = 'dashboard' | 'datasource' | 'breakdown' | 'building';
+
+interface SelectedSource { id: string; label: string }
+
+const BASE_SECTIONS: NavSection[] = [
+  {
+    id: 's26',
+    label: '26 Big 12 🏀 tournament',
+    items: [
+      { id: 'kansas', label: 'Kansas' },
+      { id: 'tcu', label: 'TCU' },
+      { id: 'arizona', label: 'Arizona' },
+      { id: 'byu', label: 'BYU' },
+      { id: 'houston', label: 'Houston' },
+    ],
+  },
+  {
+    id: 's25',
+    label: '25 Big 12 🏀 tournament',
+    items: [
+      { id: 'iowa-state', label: 'Iowa State' },
+      { id: 'texas-tech', label: 'Texas Tech' },
+    ],
+  },
+  {
+    id: 'placeholder',
+    label: 'Section Header',
+    items: [
+      { id: 'p1', label: 'Label', isPlaceholder: true },
+      { id: 'p2', label: 'Label', isPlaceholder: true },
+      { id: 'p3', label: 'Label', isPlaceholder: true },
+    ],
+  },
+];
+
+const ALL_SOURCES = [
+  { id: 's1', label: 'Cyclone basketball 2020-21' },
+  { id: 's2', label: 'Cyclone basketball 2022-23' },
+  { id: 's3', label: 'Kansas basketball 2024-25' },
+  { id: 's4', label: 'Cyclone basketball (non-con) 2022-23' },
+];
+
+const DATASOURCE_CHIPS = [
+  'Show me Cyclones game stats',
+  'Compare seasons side by side',
+  'Top scorers this year',
+  'Big 12 conference record',
+];
+
+const BREAKDOWN_CHIPS = [
+  'Show shooting percentages',
+  'Break down by opponent',
+  'Focus on conference games',
+  'Add player headshots',
+];
+
+const isCreating = (step: Step) =>
+  step === 'datasource' || step === 'breakdown' || step === 'building';
 
 export default function AuthoringFlow() {
-  const [step, setStep] = useState<Step>('welcome');
-  const [prompt, setPrompt] = useState('');
+  // Start on an existing dashboard
+  const [step, setStep] = useState<Step>('dashboard');
+  const [activeNavId, setActiveNavId] = useState<string>('kansas');
+  const [sections, setSections] = useState<NavSection[]>(BASE_SECTIONS);
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  if (step === 'published') {
-    return <Dashboard />;
-  }
+  const handleNewDash = () => {
+    setSelectedSources([]);
+    setSidebarCollapsed(true);   // collapse nav on entry
+    setStep('datasource');
+  };
 
-  return (
-    <div className="min-h-full bg-background flex flex-col">
-      {/* M3 Top App Bar */}
-      <header
-        className="flex items-center justify-between px-6 py-3 bg-[var(--md-surface-container-low)] border-b border-[var(--md-outline-variant)]"
-        style={{ boxShadow: 'var(--md-elevation-1)' }}
-      >
-        {/* Leading — app logo + title */}
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground font-bold text-xs"
-            style={{ borderRadius: 'var(--md-shape-small)' }}
-          >
-            IS
-          </div>
-          <span className="text-foreground font-medium text-base tracking-[0.15px]">
-            Dashboard Builder
-          </span>
-        </div>
+  const handleNavItemClick = (id: string) => {
+    setActiveNavId(id);
+    if (isCreating(step)) {
+      // Clicking a nav item exits creation and shows that dashboard
+      setSidebarCollapsed(false);
+      setStep('dashboard');
+    }
+  };
 
-        {/* Trailing — M3 horizontal stepper */}
-        <StepPips current={step} />
-      </header>
+  const handleToggleCollapse = () => {
+    setSidebarCollapsed(prev => !prev);
+  };
 
-      <main className="flex-1 flex items-center justify-center p-8">
-        {step === 'welcome' && (
-          <StepWelcome onSubmit={(p) => { setPrompt(p); setStep('confirmation'); }} />
-        )}
-        {step === 'confirmation' && (
-          <StepConfirmation
-            prompt={prompt}
-            onConfirm={() => setStep('building')}
-            onBack={() => setStep('welcome')}
-          />
-        )}
-        {step === 'building' && (
-          <StepBuilding onComplete={() => setStep('preview')} />
-        )}
-        {step === 'preview' && (
-          <StepPreview onPublish={() => setStep('published')} />
-        )}
-      </main>
-    </div>
+  const handleSelectionChange = (sources: SelectedSource[]) => {
+    setSelectedSources(sources);
+  };
+
+  const handleDataSourceNext = (sources: SelectedSource[]) => {
+    setSelectedSources(sources);
+    setStep('breakdown');
+  };
+
+  const handleRemoveSource = (id: string) => {
+    setSelectedSources(prev => prev.filter(s => s.id !== id));
+  };
+
+  const handleAddSource = (source: SelectedSource) => {
+    setSelectedSources(prev =>
+      prev.some(s => s.id === source.id) ? prev : [...prev, source]
+    );
+  };
+
+  const availableSources = ALL_SOURCES.filter(
+    s => !selectedSources.some(sel => sel.id === s.id)
   );
-}
 
-const STEPS: Step[] = ['welcome', 'confirmation', 'building', 'preview'];
-const STEP_LABELS: Record<Step, string> = {
-  welcome:      'Describe',
-  confirmation: 'Confirm',
-  building:     'Build',
-  preview:      'Preview',
-  published:    'Published',
-};
+  const handleBuildComplete = () => {
+    // Add newly created item to nav
+    setSections(prev => {
+      if (prev[0]?.id === 'created') return prev;
+      return [
+        {
+          id: 'created',
+          label: 'My Dashboards',
+          items: [{ id: 'cyclone-2324', label: 'Iowa State 2023-24' }],
+        },
+        ...prev,
+      ];
+    });
+    setActiveNavId('cyclone-2324');
+    setSidebarCollapsed(false);  // expand nav on completion
+    setStep('dashboard');
+  };
 
-function StepPips({ current }: { current: Step }) {
-  const idx = STEPS.indexOf(current);
   return (
-    <div className="flex items-center">
-      {STEPS.map((s, i) => {
-        const isComplete = i < idx;
-        const isActive   = i === idx;
+    <div className="flex h-screen overflow-hidden">
+      <AppSidebar
+        sections={sections}
+        activeId={activeNavId}
+        collapsed={sidebarCollapsed}
+        onItemClick={handleNavItemClick}
+        onNewDash={handleNewDash}
+        onToggleCollapse={handleToggleCollapse}
+      />
 
-        return (
-          <div key={s} className="flex items-center">
-            <div className="flex flex-col items-center gap-1">
-              {/* Step circle */}
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
-                  isComplete
-                    ? 'bg-primary text-primary-foreground'
-                    : isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border-2 border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]'
-                }`}
-              >
-                {isComplete ? (
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  i + 1
-                )}
-              </div>
-              {/* Step label */}
-              <span
-                className={`text-[10px] font-medium tracking-[0.5px] uppercase transition-colors duration-300 ${
-                  isActive ? 'text-primary' : 'text-[var(--md-on-surface-variant)]'
-                }`}
-              >
-                {STEP_LABELS[s]}
-              </span>
+      <div
+        className="flex-1 flex flex-col min-h-0 overflow-hidden"
+        style={{ background: '#f1f5f9' }}
+      >
+        {step === 'dashboard' && <Dashboard noSidebar />}
+
+        {isCreating(step) && (
+          <>
+            {/* Page header */}
+            <div className="px-10 pt-10 pb-6 flex-shrink-0">
+              <h1 className="text-[22px] font-bold text-foreground tracking-[-0.25px]">
+                Let&apos;s create a dashboard page
+              </h1>
+              <p className="text-sm text-[var(--md-on-surface-variant)] mt-1">
+                What data would you like to use? Or ask a data question and we can find the right sources for you.
+              </p>
             </div>
 
-            {/* Connector line */}
-            {i < STEPS.length - 1 && (
-              <div
-                className={`w-10 h-px mx-2 mb-4 transition-colors duration-300 ${
-                  isComplete ? 'bg-primary' : 'bg-[var(--md-outline-variant)]'
-                }`}
-              />
-            )}
-          </div>
-        );
-      })}
+            {/* Step content + persistent input */}
+            <div className="flex-1 flex flex-col items-center px-10 pb-6 overflow-y-auto">
+              {step === 'datasource' && (
+                <StepDataSource
+                  onNext={handleDataSourceNext}
+                  onSelectionChange={handleSelectionChange}
+                />
+              )}
+              {step === 'breakdown' && (
+                <StepBreakdown onSubmit={() => setStep('building')} />
+              )}
+              {step === 'building' && (
+                <div className="w-full max-w-[600px]">
+                  <StepBuilding onComplete={handleBuildComplete} />
+                </div>
+              )}
+
+              {(step === 'datasource' || step === 'breakdown') && (
+                <div className="w-full max-w-[600px] mt-4">
+                  <PromptInput
+                    chips={step === 'datasource' ? DATASOURCE_CHIPS : BREAKDOWN_CHIPS}
+                    selectedSources={selectedSources}
+                    availableSources={availableSources}
+                    onRemoveSource={handleRemoveSource}
+                    onAddSource={handleAddSource}
+                    placeholder="What data question can I answer?"
+                    onSubmit={() => step === 'datasource' && setStep('breakdown')}
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
