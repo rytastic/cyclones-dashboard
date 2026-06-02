@@ -7,8 +7,18 @@ import StepBreakdown from './StepBreakdown';
 import StepBuilding from './StepBuilding';
 import PromptInput from './PromptInput';
 import Dashboard from '@/components/dashboard/Dashboard';
+import TEAMS from '@/data/teams';
 
 type Step = 'dashboard' | 'datasource' | 'breakdown' | 'building';
+
+// Maps data source IDs to the TEAMS keys we have data for
+const SOURCE_TO_TEAM: Record<string, string> = {
+  's3':  'kansas',
+  's9':  'houston',
+  's10': 'kansas',
+  's12': 'tcu',
+  's13': 'arizona',
+};
 
 interface SelectedSource { id: string; label: string }
 
@@ -101,6 +111,8 @@ export default function AuthoringFlow() {
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
   const [promptInputValue, setPromptInputValue] = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // maps created nav item IDs to TEAMS keys so Dashboard knows which data to load
+  const [navTeamOverrides, setNavTeamOverrides] = useState<Record<string, string>>({});
 
   const handleNewDash = () => {
     setSelectedSources([]);
@@ -153,20 +165,31 @@ export default function AuthoringFlow() {
   );
 
   const handleBuildComplete = () => {
-    // Add newly created item to nav
+    // Determine which team to show based on selected sources
+    const teamId = selectedSources
+      .map(s => SOURCE_TO_TEAM[s.id])
+      .find(Boolean) ?? undefined; // undefined → Dashboard falls back to Iowa State
+
+    // Derive a readable label: use the team's full name if we have data, else the source label
+    const teamName = teamId
+      ? (TEAMS[teamId]?.team ?? selectedSources[0]?.label ?? 'My Dashboard')
+      : (selectedSources[0]?.label ?? 'Iowa State 2023-24');
+
+    const navId = `created-${teamId ?? 'default'}-${Date.now()}`;
+
     setSections(prev => {
-      if (prev[0]?.id === 'created') return prev;
-      return [
-        {
-          id: 'created',
-          label: 'My Dashboards',
-          items: [{ id: 'cyclone-2324', label: 'Iowa State 2023-24' }],
-        },
-        ...prev,
-      ];
+      const withoutCreated = prev.filter(s => s.id !== 'created');
+      const existingCreated = prev.find(s => s.id === 'created');
+      const createdItems = existingCreated ? [...existingCreated.items, { id: navId, label: teamName }] : [{ id: navId, label: teamName }];
+      return [{ id: 'created', label: 'My Dashboards', items: createdItems }, ...withoutCreated];
     });
-    setActiveNavId('cyclone-2324');
-    setSidebarCollapsed(false);  // expand nav on completion
+
+    if (teamId) {
+      setNavTeamOverrides(prev => ({ ...prev, [navId]: teamId }));
+    }
+
+    setActiveNavId(navId);
+    setSidebarCollapsed(false);
     setStep('dashboard');
   };
 
@@ -188,7 +211,7 @@ export default function AuthoringFlow() {
         {step === 'dashboard' && (
           <Dashboard
             noSidebar
-            teamId={activeNavId}
+            teamId={navTeamOverrides[activeNavId] ?? activeNavId}
             sectionTitle={sections.find(s => s.items.some(i => i.id === activeNavId))?.label}
           />
         )}
