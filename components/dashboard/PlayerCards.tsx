@@ -4,21 +4,16 @@ import type { Player } from './types';
 
 interface Props {
   players: Player[];
-  accentColor: 'cardinal' | 'gold';
   highlightedPlayer: string | null;
 }
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
-export default function PlayerCards({ players, accentColor, highlightedPlayer }: Props) {
+export default function PlayerCards({ players, highlightedPlayer }: Props) {
   const top3 = [...players].sort((a, b) => b.ppg - a.ppg).slice(0, 3);
-  const accentGrad = accentColor === 'cardinal'
-    ? 'from-cardinal/20 to-cardinal/5 border-cardinal/30'
-    : 'from-gold/20 to-gold/5 border-gold/30';
-  const accentText = accentColor === 'cardinal' ? 'text-cardinal' : 'text-gold';
-  const accentBadge = accentColor === 'cardinal'
-    ? 'bg-cardinal text-white'
-    : 'bg-gold text-slate-900';
+  const accentGrad = 'from-blue-50 to-blue-50/30 border-blue-200';
+  const accentText = 'text-[#3b82f6]';
+  const accentBadge = 'bg-[#3b82f6] text-white';
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -72,9 +67,7 @@ export default function PlayerCards({ players, accentColor, highlightedPlayer }:
             </div>
 
             {isHighlighted && (
-              <div className={`mt-3 text-center text-xs font-semibold py-1.5 rounded-lg ${
-                accentColor === 'cardinal' ? 'bg-cardinal/20 text-cardinal' : 'bg-gold/20 text-gold-dark'
-              }`}>
+              <div className="mt-3 text-center text-xs font-semibold py-1.5 rounded-lg bg-[#3b82f6]/20 text-[#3b82f6]">
                 ★ Highlighted
               </div>
             )}

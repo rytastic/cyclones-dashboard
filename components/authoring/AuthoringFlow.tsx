@@ -73,12 +73,21 @@ export default function AuthoringFlow() {
   const [activeNavId, setActiveNavId] = useState<string>('kansas');
   const [sections, setSections] = useState<NavSection[]>(BASE_SECTIONS);
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
+  const [promptInputValue, setPromptInputValue] = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleNewDash = () => {
     setSelectedSources([]);
-    setSidebarCollapsed(true);   // collapse nav on entry
+    setPromptInputValue('');
+    setSidebarCollapsed(true);
     setStep('datasource');
+  };
+
+  const handleCloseCreation = () => {
+    setSidebarCollapsed(false);
+    setSelectedSources([]);
+    setPromptInputValue('');
+    setStep('dashboard');
   };
 
   const handleNavItemClick = (id: string) => {
@@ -155,13 +164,24 @@ export default function AuthoringFlow() {
         {isCreating(step) && (
           <>
             {/* Page header */}
-            <div className="px-10 pt-10 pb-6 flex-shrink-0">
-              <h1 className="text-[22px] font-bold text-foreground tracking-[-0.25px]">
-                Let&apos;s create a dashboard page
-              </h1>
-              <p className="text-sm text-[var(--md-on-surface-variant)] mt-1">
-                What data would you like to use? Or ask a data question and we can find the right sources for you.
-              </p>
+            <div className="px-10 pt-10 pb-6 flex-shrink-0 flex items-start justify-between">
+              <div>
+                <h1 className="text-[22px] font-bold text-foreground tracking-[-0.25px]">
+                  Let&apos;s create a dashboard page
+                </h1>
+                <p className="text-sm text-[var(--md-on-surface-variant)] mt-1">
+                  What data would you like to use? Or ask a data question and we can find the right sources for you.
+                </p>
+              </div>
+              <button
+                onClick={handleCloseCreation}
+                className="mt-0.5 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors flex-shrink-0"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
             </div>
 
             {/* Step content + persistent input */}
@@ -173,7 +193,11 @@ export default function AuthoringFlow() {
                 />
               )}
               {step === 'breakdown' && (
-                <StepBreakdown onSubmit={() => setStep('building')} />
+                <StepBreakdown
+                  onSubmit={() => setStep('building')}
+                  onBack={() => setStep('datasource')}
+                  onSelectionChange={setPromptInputValue}
+                />
               )}
               {step === 'building' && (
                 <div className="w-full max-w-[600px]">
@@ -190,7 +214,12 @@ export default function AuthoringFlow() {
                     onRemoveSource={handleRemoveSource}
                     onAddSource={handleAddSource}
                     placeholder="What data question can I answer?"
-                    onSubmit={() => step === 'datasource' && setStep('breakdown')}
+                    inputValue={step === 'breakdown' ? promptInputValue : undefined}
+                    ctaLabel={step === 'breakdown' ? 'Create dash' : undefined}
+                    onSubmit={() => {
+                      if (step === 'datasource') setStep('breakdown');
+                      if (step === 'breakdown') setStep('building');
+                    }}
                   />
                 </div>
               )}

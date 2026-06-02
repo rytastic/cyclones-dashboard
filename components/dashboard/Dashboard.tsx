@@ -21,7 +21,6 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
   const [selectedYear, setSelectedYear] = useState(data.seasons[data.seasons.length - 1].year);
   const [chartMetric, setChartMetric] = useState<ChartMetric>('ppg');
   const [highlightedPlayer, setHighlightedPlayer] = useState<string | null>(null);
-  const [accentColor, setAccentColor] = useState<'cardinal' | 'gold'>('cardinal');
   const [chatOpen, setChatOpen] = useState(false);
 
   const season = useMemo(
@@ -48,15 +47,8 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
       case 'clearHighlight':
         setHighlightedPlayer(null);
         break;
-      case 'setAccent':
-        setAccentColor(cmd.value as 'cardinal' | 'gold');
-        break;
     }
   };
-
-  const accent = accentColor === 'cardinal' ? '#C8102E' : '#F1BE48';
-  const accentText = accentColor === 'cardinal' ? 'text-cardinal' : 'text-[#F1BE48]';
-  const accentBg = accentColor === 'cardinal' ? 'bg-cardinal' : 'bg-[#F1BE48]';
 
   return (
     <div className="flex h-full min-h-screen bg-slate-50 font-sans">
@@ -65,12 +57,14 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
         {/* Logo */}
         <div className="px-5 py-5 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className={`w-9 h-9 rounded-lg ${accentBg} flex items-center justify-center flex-shrink-0 transition-colors duration-300`}>
-              <span className={`text-base font-black ${accentColor === 'gold' ? 'text-slate-900' : 'text-white'}`}>IS</span>
+            <div className="w-9 h-9 rounded-lg bg-[#3b82f6] flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
             </div>
             <div>
-              <p className="text-slate-100 text-xs font-bold leading-tight">Iowa State</p>
-              <p className="text-slate-400 text-[10px]">Cyclones MBB</p>
+              <p className="text-slate-100 text-xs font-bold leading-tight">Analytics</p>
+              <p className="text-slate-400 text-[10px]">Dashboard</p>
             </div>
           </div>
         </div>
@@ -88,13 +82,13 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
               key={item.label}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-150 ${
                 item.active
-                  ? `${accentColor === 'cardinal' ? 'bg-cardinal/15 text-cardinal' : 'bg-[#F1BE48]/15 text-[#F1BE48]'}`
+                  ? 'bg-[#3b82f6]/15 text-[#3b82f6]'
                   : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
               }`}
             >
               <span className="text-base">{item.icon}</span>
               <span className="font-medium">{item.label}</span>
-              {item.active && <div className={`ml-auto w-1.5 h-1.5 rounded-full ${accentBg}`} />}
+              {item.active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />}
             </div>
           ))}
         </nav>
@@ -106,7 +100,7 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
               onClick={() => setChatOpen(o => !o)}
               className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 chatOpen
-                  ? `${accentBg} ${accentColor === 'gold' ? 'text-slate-900' : 'text-white'}`
+                  ? 'bg-[#3b82f6] text-white'
                   : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
               }`}
             >
@@ -127,13 +121,15 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
         {/* Header */}
         <header className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
-            {/* Team logo placeholder */}
-            <div className={`w-12 h-12 rounded-full ${accentBg} flex items-center justify-center shadow-md transition-colors duration-300`}>
-              <span className={`font-black text-sm ${accentColor === 'gold' ? 'text-slate-900' : 'text-white'}`}>ISU</span>
+            {/* Dashboard logo */}
+            <div className="w-12 h-12 rounded-full bg-[#3b82f6] flex items-center justify-center shadow-md">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
             </div>
             <div>
-              <h1 className="text-slate-900 font-bold text-lg leading-tight">Iowa State Cyclones</h1>
-              <p className="text-slate-400 text-xs">Men&apos;s Basketball · {season.year} Season</p>
+              <h1 className="text-slate-900 font-bold text-lg leading-tight">Basketball Analytics</h1>
+              <p className="text-slate-400 text-xs">{season.year} Season</p>
             </div>
           </div>
 
@@ -146,7 +142,7 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
                   onClick={() => setSelectedYear(s.year)}
                   className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${
                     selectedYear === s.year
-                      ? `${accentBg} ${accentColor === 'gold' ? 'text-slate-900' : 'text-white'} shadow-sm`
+                      ? 'bg-[#3b82f6] text-white shadow-sm'
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
@@ -158,7 +154,7 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
             {/* Record badge */}
             <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 rounded-lg">
               <span className="text-slate-500 text-xs">Record:</span>
-              <span className={`text-xs font-bold ${accentText}`}>{season.record}</span>
+              <span className="text-xs font-bold text-[#3b82f6]">{season.record}</span>
             </div>
 
             {/* Chat toggle (mobile) */}
@@ -166,7 +162,7 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
               <button
                 onClick={() => setChatOpen(o => !o)}
                 className={`xl:hidden flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
-                  chatOpen ? `${accentBg} ${accentColor === 'gold' ? 'text-slate-900' : 'text-white'}` : 'bg-slate-100 text-slate-600'
+                  chatOpen ? 'bg-[#3b82f6] text-white' : 'bg-slate-100 text-slate-600'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,12 +177,12 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
         {/* Dashboard content */}
         <div className="px-8 py-6 space-y-6">
           {/* Stats summary bar */}
-          <StatsBar season={season} accentColor={accentColor} />
+          <StatsBar season={season} />
 
           {/* Charts row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <TrendChart seasons={data.seasons} metric={chartMetric} accentColor={accentColor} />
-            <ComparisonChart season={season} metric={chartMetric} accentColor={accentColor} highlightedPlayer={resolvedHighlight} />
+            <TrendChart seasons={data.seasons} metric={chartMetric} />
+            <ComparisonChart season={season} metric={chartMetric} highlightedPlayer={resolvedHighlight} />
           </div>
 
           {/* Player cards */}
@@ -194,7 +190,7 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
             <h2 className="text-slate-800 font-bold text-sm uppercase tracking-wider mb-3">
               Top Performers · {season.year}
             </h2>
-            <PlayerCards players={season.players} accentColor={accentColor} highlightedPlayer={resolvedHighlight} />
+            <PlayerCards players={season.players} highlightedPlayer={resolvedHighlight} />
           </div>
 
           {/* Leaderboard */}
@@ -218,7 +214,6 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
             <LeaderboardTable
               players={season.players}
               highlightedPlayer={resolvedHighlight}
-              accentColor={accentColor}
               chartMetric={chartMetric}
             />
           </div>
@@ -235,7 +230,6 @@ export default function Dashboard({ isPreview = false, noSidebar = false }: Prop
           onCommand={handleCommand}
           chartMetric={chartMetric}
           highlightedPlayer={resolvedHighlight}
-          accentColor={accentColor}
         />
       )}
     </div>

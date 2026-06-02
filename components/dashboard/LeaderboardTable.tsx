@@ -9,7 +9,6 @@ type SortKey = 'name' | 'ppg' | 'rpg' | 'apg' | 'spg' | 'bpg' | 'fgPct' | 'three
 interface Props {
   players: Player[];
   highlightedPlayer: string | null;
-  accentColor: 'cardinal' | 'gold';
   chartMetric: ChartMetric;
 }
 
@@ -26,7 +25,7 @@ const COLUMNS: { key: SortKey; label: string; width: string }[] = [
   { key: 'mpg', label: 'MPG', width: 'w-16' },
 ];
 
-export default function LeaderboardTable({ players, highlightedPlayer, accentColor, chartMetric }: Props) {
+export default function LeaderboardTable({ players, highlightedPlayer, chartMetric }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('ppg');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
@@ -48,9 +47,9 @@ export default function LeaderboardTable({ players, highlightedPlayer, accentCol
     return sortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number);
   });
 
-  const accent = accentColor === 'cardinal' ? '#C8102E' : '#F1BE48';
-  const accentLight = accentColor === 'cardinal' ? 'bg-cardinal/5 border-cardinal/20' : 'bg-gold/5 border-gold/20';
-  const accentText = accentColor === 'cardinal' ? 'text-cardinal' : 'text-gold';
+  const accent = '#3b82f6';
+  const accentLight = 'bg-blue-50 border-blue-200';
+  const accentText = 'text-[#3b82f6]';
 
   // The column matching the current chart metric gets a subtle highlight
   const metricToColumn: Record<ChartMetric, SortKey> = {
@@ -106,7 +105,7 @@ export default function LeaderboardTable({ players, highlightedPlayer, accentCol
                 >
                   <td className="px-4 py-3">
                     {isTop
-                      ? <span className="text-gold text-base">🏆</span>
+                      ? <span className="text-base">🏆</span>
                       : <span className="text-slate-400 font-mono text-xs">{idx + 1}</span>
                     }
                   </td>
@@ -116,9 +115,7 @@ export default function LeaderboardTable({ players, highlightedPlayer, accentCol
                         {player.name}
                       </span>
                       {isHighlighted && (
-                        <span className={`ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                          accentColor === 'cardinal' ? 'bg-cardinal text-white' : 'bg-gold text-slate-900'
-                        }`}>●</span>
+                        <span className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#3b82f6] text-white">●</span>
                       )}
                     </div>
                     <span className="text-slate-400 text-xs">{player.position}</span>

@@ -16,11 +16,10 @@ interface Props {
   onCommand: (cmd: ParsedCommand) => void;
   chartMetric: ChartMetric;
   highlightedPlayer: string | null;
-  accentColor: 'cardinal' | 'gold';
 }
 
 export interface ParsedCommand {
-  type: 'setMetric' | 'highlight' | 'clearHighlight' | 'setAccent' | 'setSeason';
+  type: 'setMetric' | 'highlight' | 'clearHighlight' | 'setSeason';
   value?: string;
 }
 
@@ -34,14 +33,10 @@ const METRIC_TRIGGERS: { patterns: RegExp[]; metric: ChartMetric; label: string 
 const HIGHLIGHT_TRIGGER = /highlight\s+([\w\s]+?)(?:\s+in|\s+on|\s*$)/i;
 const TOP_SCORER_TRIGGER = /highlight.*\btop\s+scor/i;
 const CLEAR_TRIGGER = /clear|remove|reset\s+highlight/i;
-const GOLD_TRIGGER = /gold|yellow|change.*(color|theme).*gold|gold.*(color|theme)/i;
-const CARDINAL_TRIGGER = /red|cardinal|change.*(color|theme).*red|red.*(color|theme)/i;
-
 const SUGGESTIONS = [
   'Change the chart to show rebounds',
   'Highlight the top scorer in the table',
   'Switch to assists for the comparison chart',
-  'Change the accent color to gold',
   'Show steals in the charts',
   'Clear the highlight',
 ];
@@ -82,26 +77,12 @@ function parseCommand(input: string): { command: ParsedCommand; response: string
     }
   }
 
-  // Accent color
-  if (GOLD_TRIGGER.test(input)) {
-    return {
-      command: { type: 'setAccent', value: 'gold' },
-      response: "Switched the accent color to Iowa State Gold (#F1BE48). Looking sharp!",
-    };
-  }
-  if (CARDINAL_TRIGGER.test(input)) {
-    return {
-      command: { type: 'setAccent', value: 'cardinal' },
-      response: "Switched back to Cardinal Red (#C8102E). Go Cyclones!",
-    };
-  }
-
   return null;
 }
 
 let msgIdCounter = 10;
 
-export default function ChatPane({ open, onClose, onCommand, chartMetric, highlightedPlayer, accentColor }: Props) {
+export default function ChatPane({ open, onClose, onCommand, chartMetric, highlightedPlayer }: Props) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -142,7 +123,7 @@ export default function ChatPane({ open, onClose, onCommand, chartMetric, highli
       onCommand(result.command);
       responseText = result.response;
     } else {
-      responseText = `I understand you want to "${text}", but I'm not sure how to apply that change. Try asking me to:\n• Change the chart metric (points, rebounds, assists, steals)\n• Highlight a player by name\n• Change the accent color to gold or red`;
+      responseText = `I understand you want to "${text}", but I'm not sure how to apply that change. Try asking me to:\n• Change the chart metric (points, rebounds, assists, steals)\n• Highlight a player by name`;
     }
 
     const assistantMsg: Message = {
@@ -154,8 +135,8 @@ export default function ChatPane({ open, onClose, onCommand, chartMetric, highli
     setMessages(prev => [...prev, assistantMsg]);
   };
 
-  const accentBg = accentColor === 'cardinal' ? 'bg-cardinal' : 'bg-gold';
-  const accentText = accentColor === 'cardinal' ? 'text-cardinal' : 'text-gold';
+  const accentBg = 'bg-[#3b82f6]';
+  const accentText = 'text-[#3b82f6]';
 
   return (
     <>
@@ -199,7 +180,6 @@ export default function ChatPane({ open, onClose, onCommand, chartMetric, highli
         {/* Context pills */}
         <div className="flex flex-wrap gap-1.5 px-4 py-3 border-b border-slate-800/50 flex-shrink-0">
           <ContextPill label="Chart" value={chartMetric.toUpperCase()} />
-          <ContextPill label="Accent" value={accentColor === 'cardinal' ? 'Cardinal Red' : 'Cyclones Gold'} />
           {highlightedPlayer && <ContextPill label="Highlight" value={highlightedPlayer} />}
         </div>
 

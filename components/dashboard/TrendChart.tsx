@@ -7,13 +7,12 @@ import { METRIC_LABELS } from './types';
 interface Props {
   seasons: Season[];
   metric: ChartMetric;
-  accentColor: 'cardinal' | 'gold';
 }
 
-const PALETTE = ['#0866FF', '#31A24C', '#F02849', '#FFAD0F', '#8A3FC7'];
+const PALETTE = ['#31A24C', '#F02849', '#FFAD0F', '#8A3FC7', '#0866FF'];
 
-export default function TrendChart({ seasons, metric, accentColor }: Props) {
-  const primaryColor = accentColor === 'cardinal' ? '#C8102E' : '#F1BE48';
+export default function TrendChart({ seasons, metric }: Props) {
+  const primaryColor = '#3b82f6';
 
   // Build top-5 players by their peak value of the metric
   const allNames = Array.from(new Set(seasons.flatMap(s => s.players.map(p => p.name))));

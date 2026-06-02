@@ -7,12 +7,11 @@ import { METRIC_LABELS, METRIC_SHORT } from './types';
 interface Props {
   season: Season;
   metric: ChartMetric;
-  accentColor: 'cardinal' | 'gold';
   highlightedPlayer: string | null;
 }
 
-export default function ComparisonChart({ season, metric, accentColor, highlightedPlayer }: Props) {
-  const primaryColor = accentColor === 'cardinal' ? '#C8102E' : '#F1BE48';
+export default function ComparisonChart({ season, metric, highlightedPlayer }: Props) {
+  const primaryColor = '#3b82f6';
   const dimColor = '#cbd5e1';
 
   const data = [...season.players]

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const BREAKDOWNS = [
   {
@@ -135,12 +135,19 @@ const THUMBNAIL_MAP: Record<string, React.FC> = {
 
 interface Props {
   onSubmit: (breakdownId: string) => void;
+  onBack?: () => void;
+  onSelectionChange?: (title: string) => void;
 }
 
-export default function StepBreakdown({ onSubmit }: Props) {
+export default function StepBreakdown({ onSubmit, onBack, onSelectionChange }: Props) {
   const [selected, setSelected] = useState<string>(
     BREAKDOWNS.find((b) => b.defaultSelected)?.id ?? BREAKDOWNS[0].id
   );
+
+  useEffect(() => {
+    const title = BREAKDOWNS.find(b => b.id === selected)?.title ?? '';
+    onSelectionChange?.(title);
+  }, [selected, onSelectionChange]);
 
   return (
     <div className="w-full max-w-[600px] animate-fade-up">
@@ -157,7 +164,7 @@ export default function StepBreakdown({ onSubmit }: Props) {
               <li key={b.id}>
                 <button
                   onClick={() => setSelected(b.id)}
-                  className="w-full flex items-center gap-4 px-6 py-4 hover:bg-[var(--md-surface-container-low)] transition-colors text-left"
+                  className="w-full flex items-center gap-4 px-6 py-4 hover:bg-[#EFF1F7] transition-colors text-left"
                 >
                   {/* Preview thumbnail */}
                   <div
@@ -191,18 +198,15 @@ export default function StepBreakdown({ onSubmit }: Props) {
           })}
         </ul>
 
-        <div className="flex justify-end px-6 py-4">
+        <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
           <button
-            onClick={() => onSubmit(selected)}
-            className="text-sm font-medium transition-opacity hover:opacity-90"
-            style={{
-              padding: '10px 24px',
-              borderRadius: 9999,
-              background: 'var(--md-primary)',
-              color: 'var(--md-on-primary)',
-            }}
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
           >
-            Create dash
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back
           </button>
         </div>
       </div>

@@ -14,6 +14,8 @@ interface Props {
   onRemoveSource?: (id: string) => void;
   onAddSource?: (source: SourceChip) => void;
   placeholder?: string;
+  inputValue?: string;
+  ctaLabel?: string;
   onSubmit?: (value: string) => void;
 }
 
@@ -70,10 +72,17 @@ export default function PromptInput({
   onRemoveSource,
   onAddSource,
   placeholder = 'What data question can I answer?',
+  inputValue,
+  ctaLabel,
   onSubmit,
 }: Props) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(inputValue ?? '');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Sync externally controlled value
+  useEffect(() => {
+    if (inputValue !== undefined) setValue(inputValue);
+  }, [inputValue]);
 
   const handleSubmit = () => {
     if (value.trim()) onSubmit?.(value.trim());
@@ -173,16 +182,31 @@ export default function PromptInput({
             placeholder={placeholder}
             className="flex-1 bg-transparent text-sm text-foreground placeholder-[var(--md-on-surface-variant)] outline-none"
           />
-          <button
-            onClick={handleSubmit}
-            className="w-9 h-9 flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80"
-            style={{ borderRadius: 9999, background: '#334155', color: '#f1f5f9' }}
-            aria-label="Submit"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
+          {ctaLabel ? (
+            <button
+              onClick={handleSubmit}
+              className="flex-shrink-0 text-sm font-medium transition-opacity hover:opacity-90"
+              style={{
+                padding: '8px 20px',
+                borderRadius: 9999,
+                background: 'var(--md-primary)',
+                color: 'var(--md-on-primary)',
+              }}
+            >
+              {ctaLabel}
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              className="w-9 h-9 flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80"
+              style={{ borderRadius: 9999, background: '#334155', color: '#f1f5f9' }}
+              aria-label="Submit"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 

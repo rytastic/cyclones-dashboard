@@ -147,7 +147,7 @@ export default function AppSidebar({
                         }
                         onMouseEnter={(e) => {
                           if (!isActive && !item.isPlaceholder)
-                            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,0,0,0.04)';
+                            (e.currentTarget as HTMLButtonElement).style.background = '#EFF1F7';
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive)
@@ -170,7 +170,7 @@ export default function AppSidebar({
                         }
                         onMouseEnter={(e) => {
                           if (!isActive && !item.isPlaceholder)
-                            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,0,0,0.04)';
+                            (e.currentTarget as HTMLButtonElement).style.background = '#EFF1F7';
                         }}
                         onMouseLeave={(e) => {
                           if (!isActive)

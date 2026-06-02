@@ -4,19 +4,18 @@ import type { Season } from './types';
 
 interface Props {
   season: Season;
-  accentColor: 'cardinal' | 'gold';
 }
 
-export default function StatsBar({ season, accentColor }: Props) {
+export default function StatsBar({ season }: Props) {
   const topScorer = [...season.players].sort((a, b) => b.ppg - a.ppg)[0];
   const topRebounder = [...season.players].sort((a, b) => b.rpg - a.rpg)[0];
   const topAssister = [...season.players].sort((a, b) => b.apg - a.apg)[0];
   const [wins, losses] = season.record.split('-').map(Number);
   const winPct = ((wins / (wins + losses)) * 100).toFixed(0);
 
-  const accent = accentColor === 'cardinal' ? 'text-cardinal' : 'text-gold';
-  const accentBg = accentColor === 'cardinal' ? 'bg-cardinal/10' : 'bg-gold/10';
-  const accentBorder = accentColor === 'cardinal' ? 'border-cardinal/20' : 'border-gold/20';
+  const accent = 'text-[#3b82f6]';
+  const accentBg = 'bg-[#3b82f6]/10';
+  const accentBorder = 'border-[#3b82f6]/20';
 
   const stats = [
     { label: 'Team Record', value: season.record, sub: `${winPct}% win rate`, highlight: true },
