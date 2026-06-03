@@ -15,7 +15,9 @@ interface Props {
   placeholder?: string;
   inputValue?: string;
   ctaLabel?: string;
+  ctaEnabled?: boolean;
   onSubmit?: (value: string) => void;
+  onValueChange?: (value: string) => void;
 }
 
 function AddSourceDropdown({
@@ -72,7 +74,9 @@ export default function PromptInput({
   placeholder = 'What data question can I answer?',
   inputValue,
   ctaLabel,
+  ctaEnabled,
   onSubmit,
+  onValueChange,
 }: Props) {
   const [value, setValue] = useState(inputValue ?? '');
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -82,8 +86,15 @@ export default function PromptInput({
     if (inputValue !== undefined) setValue(inputValue);
   }, [inputValue]);
 
+  const handleChange = (v: string) => {
+    setValue(v);
+    onValueChange?.(v);
+  };
+
+  const isCtaEnabled = ctaEnabled !== undefined ? ctaEnabled : !!value.trim();
+
   const handleSubmit = () => {
-    if (value.trim()) onSubmit?.(value.trim());
+    if (isCtaEnabled) onSubmit?.(value.trim());
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -177,7 +188,7 @@ export default function PromptInput({
         <div className="flex items-center gap-2 px-4 py-3">
           <input
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKey}
             placeholder={placeholder}
             className="flex-1 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none"
@@ -185,15 +196,15 @@ export default function PromptInput({
           {ctaLabel ? (
             <button
               onClick={handleSubmit}
-              disabled={!value.trim()}
               className="flex-shrink-0 text-sm font-medium transition-opacity"
               style={{
                 padding: '8px 20px',
                 borderRadius: 9999,
                 background: 'var(--md-primary)',
                 color: 'var(--md-on-primary)',
-                opacity: value.trim() ? 1 : 0.35,
-                cursor: value.trim() ? 'pointer' : 'not-allowed',
+                opacity: isCtaEnabled ? 1 : 0.35,
+                cursor: isCtaEnabled ? 'pointer' : 'not-allowed',
+                pointerEvents: isCtaEnabled ? 'auto' : 'none',
               }}
             >
               {ctaLabel}
@@ -201,14 +212,14 @@ export default function PromptInput({
           ) : (
             <button
               onClick={handleSubmit}
-              disabled={!value.trim()}
               className="w-9 h-9 flex items-center justify-center flex-shrink-0 transition-opacity"
               style={{
                 borderRadius: 9999,
                 background: '#334155',
                 color: '#f1f5f9',
-                opacity: value.trim() ? 1 : 0.35,
-                cursor: value.trim() ? 'pointer' : 'not-allowed',
+                opacity: isCtaEnabled ? 1 : 0.35,
+                cursor: isCtaEnabled ? 'pointer' : 'not-allowed',
+                pointerEvents: isCtaEnabled ? 'auto' : 'none',
               }}
               aria-label="Submit"
             >

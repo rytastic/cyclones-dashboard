@@ -200,6 +200,7 @@ export default function AuthoringFlow() {
   const [sections, setSections] = useState<NavSection[]>(BASE_SECTIONS);
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
   const [promptInputValue, setPromptInputValue] = useState('');
+  const [datasourcePromptValue, setDatasourcePromptValue] = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // maps created nav item IDs to TEAMS keys so Dashboard knows which data to load
   const [navTeamOverrides, setNavTeamOverrides] = useState<Record<string, string>>({});
@@ -210,6 +211,7 @@ export default function AuthoringFlow() {
   const handleNewDash = () => {
     setSelectedSources([]);
     setPromptInputValue('');
+    setDatasourcePromptValue('');
     setSidebarCollapsed(true);
     setStep('datasource');
   };
@@ -218,6 +220,7 @@ export default function AuthoringFlow() {
     setSidebarCollapsed(false);
     setSelectedSources([]);
     setPromptInputValue('');
+    setDatasourcePromptValue('');
     setStep('dashboard');
   };
 
@@ -238,11 +241,6 @@ export default function AuthoringFlow() {
     setSelectedSources(sources);
   };
 
-  const handleDataSourceNext = (sources: SelectedSource[]) => {
-    setSelectedSources(sources);
-    setStep('breakdown');
-  };
-
   const handleRemoveSource = (id: string) => {
     setSelectedSources(prev => prev.filter(s => s.id !== id));
   };
@@ -256,6 +254,8 @@ export default function AuthoringFlow() {
   const availableSources = ALL_SOURCES.filter(
     s => !selectedSources.some(sel => sel.id === s.id)
   );
+
+  const datasourceHasPrompt = !!datasourcePromptValue.trim();
 
   const handleBuildComplete = () => {
     // Determine which team to show based on selected sources
@@ -359,7 +359,6 @@ export default function AuthoringFlow() {
                   >
                     {step === 'datasource' && (
                       <StepDataSource
-                        onNext={handleDataSourceNext}
                         onSelectionChange={handleSelectionChange}
                       />
                     )}
@@ -372,19 +371,35 @@ export default function AuthoringFlow() {
                     )}
                     {/* Light separator between step and prompt */}
                     <div style={{ height: 1, background: '#e8edf2' }} />
-                    <PromptInput
-                      selectedSources={selectedSources}
-                      availableSources={availableSources}
-                      onRemoveSource={handleRemoveSource}
-                      onAddSource={handleAddSource}
-                      placeholder="What data question can I answer?"
-                      inputValue={step === 'breakdown' ? promptInputValue : undefined}
-                      ctaLabel={step === 'breakdown' ? 'Create dash' : undefined}
-                      onSubmit={() => {
-                        if (step === 'datasource') setStep('breakdown');
-                        if (step === 'breakdown') setStep('building');
-                      }}
-                    />
+                    {step === 'datasource' && (
+                      <PromptInput
+                        selectedSources={selectedSources}
+                        availableSources={availableSources}
+                        onRemoveSource={handleRemoveSource}
+                        onAddSource={handleAddSource}
+                        placeholder="Select data source(s) or ask a data question"
+                        inputValue={datasourcePromptValue}
+                        ctaLabel={datasourceHasPrompt ? 'Create dash' : 'Next'}
+                        ctaEnabled={selectedSources.length > 0 || datasourceHasPrompt}
+                        onValueChange={setDatasourcePromptValue}
+                        onSubmit={() => {
+                          if (datasourceHasPrompt) setStep('building');
+                          else setStep('breakdown');
+                        }}
+                      />
+                    )}
+                    {step === 'breakdown' && (
+                      <PromptInput
+                        selectedSources={selectedSources}
+                        availableSources={availableSources}
+                        onRemoveSource={handleRemoveSource}
+                        onAddSource={handleAddSource}
+                        placeholder="Select data source(s) or ask a data question"
+                        inputValue={promptInputValue}
+                        ctaLabel="Create dash"
+                        onSubmit={() => setStep('building')}
+                      />
+                    )}
                   </div>
 
                   {/* Suggested prompts — horizontal pill carousel with nav buttons */}

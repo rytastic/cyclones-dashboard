@@ -38,11 +38,10 @@ const ALL_SOURCES = [
 interface SelectedSource { id: string; label: string }
 
 interface Props {
-  onNext: (selected: SelectedSource[]) => void;
   onSelectionChange?: (selected: SelectedSource[]) => void;
 }
 
-export default function StepDataSource({ onNext, onSelectionChange }: Props) {
+export default function StepDataSource({ onSelectionChange }: Props) {
   const [selected, setSelected] = useState<Set<string>>(
     new Set(ALL_SOURCES.filter(s => s.defaultChecked).map(s => s.id))
   );
@@ -166,33 +165,6 @@ export default function StepDataSource({ onNext, onSelectionChange }: Props) {
           </ul>
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-end px-6 py-2.5" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <button
-            onClick={() => {
-              if (selected.size === 0) return;
-              const items = ALL_SOURCES
-                .filter(s => selected.has(s.id))
-                .map(s => ({ id: s.id, label: s.chipLabel }));
-              onNext(items);
-            }}
-            disabled={selected.size === 0}
-            className="flex items-center gap-1.5 text-sm font-medium transition-opacity"
-            style={{
-              padding: '10px 24px',
-              borderRadius: 9999,
-              background: selected.size > 0 ? 'var(--md-primary)' : 'var(--md-surface-variant)',
-              color: selected.size > 0 ? 'var(--md-on-primary)' : 'var(--md-on-surface-variant)',
-              opacity: selected.size > 0 ? 1 : 0.5,
-              cursor: selected.size > 0 ? 'pointer' : 'not-allowed',
-            }}
-          >
-            Next
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
-        </div>
       </div>
     </div>
   );
