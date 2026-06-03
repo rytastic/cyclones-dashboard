@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import AppSidebar, { type NavSection } from '@/components/shared/AppSidebar';
 import StepDataSource from './StepDataSource';
 import StepBreakdown from './StepBreakdown';
@@ -105,6 +105,90 @@ const BREAKDOWN_CHIPS = [
   'Focus on conference games',
   'Add player headshots',
 ];
+
+function ChipCarousel({ chips, onSelect }: { chips: string[]; onSelect: () => void }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const updateButtons = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 2);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+  };
+
+  useEffect(() => {
+    updateButtons();
+  }, [chips]);
+
+  const scroll = (dir: 'left' | 'right') => {
+    scrollRef.current?.scrollBy({ left: dir === 'left' ? -200 : 200, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="w-full max-w-[600px] flex items-center gap-2">
+      <button
+        onClick={() => scroll('left')}
+        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+        style={{
+          border: '1px solid #e2e8f0',
+          background: 'white',
+          opacity: canLeft ? 1 : 0.35,
+          cursor: canLeft ? 'pointer' : 'default',
+          pointerEvents: canLeft ? 'auto' : 'none',
+        }}
+        aria-label="Previous suggestions"
+      >
+        <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+
+      {/* min-w-0 is required so the flex child can shrink and actually scroll */}
+      <div
+        ref={scrollRef}
+        onScroll={updateButtons}
+        className="flex gap-2 flex-nowrap flex-1 min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {chips.map((chip) => (
+          <button
+            key={chip}
+            onClick={onSelect}
+            className="flex-shrink-0 text-sm whitespace-nowrap transition-colors hover:bg-slate-50"
+            style={{
+              padding: '8px 16px',
+              borderRadius: 9999,
+              border: '1px solid #e2e8f0',
+              background: 'white',
+              color: '#475569',
+            }}
+          >
+            {chip}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={() => scroll('right')}
+        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+        style={{
+          border: '1px solid #e2e8f0',
+          background: 'white',
+          opacity: canRight ? 1 : 0.35,
+          cursor: canRight ? 'pointer' : 'default',
+          pointerEvents: canRight ? 'auto' : 'none',
+        }}
+        aria-label="Next suggestions"
+      >
+        <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  );
+}
 
 const isCreating = (step: Step) =>
   step === 'datasource' || step === 'breakdown' || step === 'building';
@@ -303,31 +387,14 @@ export default function AuthoringFlow() {
                     />
                   </div>
 
-                  {/* Suggested prompts — separate card outside the tray shadow */}
-                  <div
-                    className="w-full max-w-[600px] rounded-2xl overflow-hidden bg-white"
-                    style={{ border: '1px solid #e2e8f0' }}
-                  >
-                    <div className="px-4 py-2.5 border-b border-[#f1f5f9]">
-                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Suggested prompts</span>
-                    </div>
-                    {(step === 'datasource' ? DATASOURCE_CHIPS : BREAKDOWN_CHIPS).slice(0, 3).map((chip, i) => (
-                      <button
-                        key={chip}
-                        onClick={() => {
-                          if (step === 'datasource') setStep('breakdown');
-                          if (step === 'breakdown') setStep('building');
-                        }}
-                        className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#EFF1F7]"
-                        style={{ borderTop: i > 0 ? '1px solid #f1f5f9' : 'none', color: '#475569' }}
-                      >
-                        <span className="text-sm font-medium">{chip}</span>
-                        <svg className="w-4 h-4 text-slate-400 flex-shrink-0 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
-                        </svg>
-                      </button>
-                    ))}
-                  </div>
+                  {/* Suggested prompts — horizontal pill carousel with nav buttons */}
+                  <ChipCarousel
+                    chips={step === 'datasource' ? DATASOURCE_CHIPS : BREAKDOWN_CHIPS}
+                    onSelect={() => {
+                      if (step === 'datasource') setStep('breakdown');
+                      if (step === 'breakdown') setStep('building');
+                    }}
+                  />
                 </>
               )}
             </div>
