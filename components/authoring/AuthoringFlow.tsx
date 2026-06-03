@@ -232,18 +232,20 @@ export default function AuthoringFlow() {
         {isCreating(step) && (
           <>
             {/* Page header */}
-            <div className="px-10 pt-10 pb-6 flex-shrink-0 flex items-start justify-between">
-              <div>
+            <div className="px-10 pt-10 pb-6 flex-shrink-0 flex items-start gap-4">
+              {/* Spacer mirrors the close button so the title stays centered */}
+              <div className="w-8 flex-shrink-0" />
+              <div className="flex-1 text-center">
                 <h1 className="text-[22px] font-bold text-foreground tracking-[-0.25px]">
                   Let&apos;s create a dashboard page
                 </h1>
                 <p className="text-sm text-[var(--md-on-surface-variant)] mt-1">
-                  What data would you like to use? Or ask a data question and we can find the right sources for you.
+                  Select a data source or ask a data question
                 </p>
               </div>
               <button
                 onClick={handleCloseCreation}
-                className="mt-0.5 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors flex-shrink-0"
+                className="w-8 flex-shrink-0 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
                 aria-label="Close"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -253,7 +255,7 @@ export default function AuthoringFlow() {
             </div>
 
             {/* Step content + persistent input */}
-            <div className="flex-1 flex flex-col items-center px-10 pb-6 overflow-y-auto">
+            <div className="flex-1 flex flex-col items-center px-10 pb-6 overflow-y-auto gap-4">
               {step === 'building' && (
                 <div className="w-full max-w-[600px]">
                   <StepBuilding onComplete={handleBuildComplete} />
@@ -261,41 +263,72 @@ export default function AuthoringFlow() {
               )}
 
               {(step === 'datasource' || step === 'breakdown') && (
-                <div
-                  className="w-full max-w-[600px]"
-                  style={{
-                    borderRadius: 16,
-                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05)',
-                  }}
-                >
-                  {step === 'datasource' && (
-                    <StepDataSource
-                      onNext={handleDataSourceNext}
-                      onSelectionChange={handleSelectionChange}
-                    />
-                  )}
-                  {step === 'breakdown' && (
-                    <StepBreakdown
-                      onSubmit={(id) => { setSelectedBreakdown(id); setStep('building'); }}
-                      onBack={() => setStep('datasource')}
-                      onSelectionChange={setPromptInputValue}
-                    />
-                  )}
-                  <PromptInput
-                    chips={step === 'datasource' ? DATASOURCE_CHIPS : BREAKDOWN_CHIPS}
-                    selectedSources={selectedSources}
-                    availableSources={availableSources}
-                    onRemoveSource={handleRemoveSource}
-                    onAddSource={handleAddSource}
-                    placeholder="What data question can I answer?"
-                    inputValue={step === 'breakdown' ? promptInputValue : undefined}
-                    ctaLabel={step === 'breakdown' ? 'Create dash' : undefined}
-                    onSubmit={() => {
-                      if (step === 'datasource') setStep('breakdown');
-                      if (step === 'breakdown') setStep('building');
+                <>
+                  {/* Tray: step card + prompt input joined under one border */}
+                  <div
+                    className="w-full max-w-[600px] overflow-hidden"
+                    style={{
+                      border: '1px solid var(--md-outline-variant)',
+                      borderRadius: 16,
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05)',
                     }}
-                  />
-                </div>
+                  >
+                    {step === 'datasource' && (
+                      <StepDataSource
+                        onNext={handleDataSourceNext}
+                        onSelectionChange={handleSelectionChange}
+                      />
+                    )}
+                    {step === 'breakdown' && (
+                      <StepBreakdown
+                        onSubmit={(id) => { setSelectedBreakdown(id); setStep('building'); }}
+                        onBack={() => setStep('datasource')}
+                        onSelectionChange={setPromptInputValue}
+                      />
+                    )}
+                    {/* Light separator between step and prompt */}
+                    <div style={{ height: 1, background: '#e8edf2' }} />
+                    <PromptInput
+                      selectedSources={selectedSources}
+                      availableSources={availableSources}
+                      onRemoveSource={handleRemoveSource}
+                      onAddSource={handleAddSource}
+                      placeholder="What data question can I answer?"
+                      inputValue={step === 'breakdown' ? promptInputValue : undefined}
+                      ctaLabel={step === 'breakdown' ? 'Create dash' : undefined}
+                      onSubmit={() => {
+                        if (step === 'datasource') setStep('breakdown');
+                        if (step === 'breakdown') setStep('building');
+                      }}
+                    />
+                  </div>
+
+                  {/* Suggested prompts — separate card outside the tray shadow */}
+                  <div
+                    className="w-full max-w-[600px] rounded-2xl overflow-hidden bg-white"
+                    style={{ border: '1px solid #e2e8f0' }}
+                  >
+                    <div className="px-4 py-2.5 border-b border-[#f1f5f9]">
+                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Suggested prompts</span>
+                    </div>
+                    {(step === 'datasource' ? DATASOURCE_CHIPS : BREAKDOWN_CHIPS).slice(0, 3).map((chip, i) => (
+                      <button
+                        key={chip}
+                        onClick={() => {
+                          if (step === 'datasource') setStep('breakdown');
+                          if (step === 'breakdown') setStep('building');
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#EFF1F7]"
+                        style={{ borderTop: i > 0 ? '1px solid #f1f5f9' : 'none', color: '#475569' }}
+                      >
+                        <span className="text-sm font-medium">{chip}</span>
+                        <svg className="w-4 h-4 text-slate-400 flex-shrink-0 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </>

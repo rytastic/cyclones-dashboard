@@ -76,7 +76,6 @@ export default function StepDataSource({ onNext, onSelectionChange }: Props) {
     <div className="w-full max-w-[600px] animate-fade-up">
       <div
         className="bg-white overflow-hidden"
-        style={{ border: '1px solid var(--md-outline-variant)', borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}
       >
         {/* Search bar */}
         <div
@@ -127,7 +126,7 @@ export default function StepDataSource({ onNext, onSelectionChange }: Props) {
         </div>
 
         {/* Scrollable list */}
-        <div className="overflow-y-auto" style={{ maxHeight: 320 }}>
+        <div className="overflow-y-auto" style={{ maxHeight: 240 }}>
           <ul className="divide-y divide-[var(--md-outline-variant)]">
             {visibleSources.length === 0 ? (
               <li className="px-6 py-8 text-center text-sm text-slate-400">
@@ -168,7 +167,7 @@ export default function StepDataSource({ onNext, onSelectionChange }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
+        <div className="flex justify-end px-6 py-2.5" style={{ borderTop: '1px solid #f1f5f9' }}>
           <button
             onClick={() => {
               if (selected.size === 0) return;

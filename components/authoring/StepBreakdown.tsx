@@ -151,7 +151,7 @@ export default function StepBreakdown({ onSubmit, onBack, onSelectionChange }: P
 
   return (
     <div className="w-full max-w-[600px] animate-fade-up">
-      <div className="bg-white overflow-hidden" style={{ border: '1px solid var(--md-outline-variant)', borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
+      <div className="bg-white overflow-hidden">
         <div className="px-6 pt-5 pb-2">
           <h2 className="text-base font-semibold text-foreground tracking-[0.1px]">Dimension breakdowns</h2>
         </div>
@@ -198,7 +198,7 @@ export default function StepBreakdown({ onSubmit, onBack, onSelectionChange }: P
           })}
         </ul>
 
-        <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
+        <div className="px-6 py-2.5" style={{ borderTop: '1px solid #f1f5f9' }}>
           <button
             onClick={onBack}
             className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"

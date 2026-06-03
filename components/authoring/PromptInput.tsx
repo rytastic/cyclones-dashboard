@@ -8,7 +8,6 @@ interface SourceChip {
 }
 
 interface Props {
-  chips: string[];
   selectedSources?: SourceChip[];
   availableSources?: SourceChip[];
   onRemoveSource?: (id: string) => void;
@@ -66,7 +65,6 @@ function AddSourceDropdown({
 }
 
 export default function PromptInput({
-  chips,
   selectedSources = [],
   availableSources = [],
   onRemoveSource,
@@ -95,14 +93,13 @@ export default function PromptInput({
     }
   };
 
-  const showChipRow = selectedSources.length > 0 || availableSources.length > 0;
+  const showChipRow = selectedSources.length > 0;
 
   return (
-    <div className="w-full pb-6">
+    <div className="w-full">
       {/* Input card */}
       <div
         className="bg-white overflow-visible"
-        style={{ border: '1px solid #e2e8f0', borderTop: 'none', borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}
       >
         {/* Selected source chips + add button */}
         {showChipRow && (
@@ -223,28 +220,6 @@ export default function PromptInput({
         </div>
       </div>
 
-      {/* Suggested prompts — full-width list, max 3, auto-submits */}
-      <div className="mt-3 rounded-2xl overflow-hidden bg-white" style={{ border: '1px solid #e2e8f0' }}>
-        <div className="px-4 py-2.5 border-b border-[#f1f5f9]">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Suggested prompts</span>
-        </div>
-        {chips.slice(0, 3).map((chip, i) => (
-          <button
-            key={chip}
-            onClick={() => { setValue(chip); onSubmit?.(chip); }}
-            className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#EFF1F7]"
-            style={{
-              borderTop: i > 0 ? '1px solid #f1f5f9' : 'none',
-              color: '#475569',
-            }}
-          >
-            <span className="text-sm font-medium">{chip}</span>
-            <svg className="w-4 h-4 text-slate-400 flex-shrink-0 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
